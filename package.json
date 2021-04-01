@@ -1,0 +1,30 @@
+{
+  "name": "swagger-smktest",
+  "version": "0.0.0",
+  "description": "Create smoke test from swagger api",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cannavit/swagger-smktest.git"
+  },
+  "keywords": [
+    "swagger",
+    "automatic",
+    "smoke",
+    "test",
+    "scann"
+  ],
+  "author": "cecilio.cannav",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cannavit/swagger-smktest/issues"
+  },
+  "homepage": "https://github.com/cannavit/swagger-smktest#readme",
+  "dependencies": {
+    "node-fetch": "^2.6.1",
+    "shelljs": "^0.8.4"
+  }
+}
