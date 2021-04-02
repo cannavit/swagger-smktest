@@ -1,95 +1,15 @@
-const shell = require("shelljs");
+const swaggerScann = require("./src/services/swaggerScann");
 
-// function sleep(milliseconds) {
-//   const date = Date.now();
-//   let currentDate = null;
-//   do {
-//     currentDate = Date.now();
-//   } while (currentDate - date < milliseconds);
-// }
-
-async function getPreview(urlSwagger) {
-  //! Init swagger page:
-  // let ENDPOINT_SWAGGER_PAGE = `curl -XPOST -H \"accept-language: it\" -H \"Content-type: application/json\" '${urlSwagger}'`;
-  //   await shell.exec(ENDPOINT_SWAGGER_PAGE, { silent: true });
-  //   sleep(500);
-
-  let ENDPOINT_SCANN_SWAGGER_FROM = `curl -XPOST -H \"accept-language: it\" -H \"Content-type: application/json\" '${urlSwagger}/swagger-ui-init.js'`,
-    resultOfExec = await shell.exec(ENDPOINT_SCANN_SWAGGER_FROM, {
-      silent: true,
-    });
-
-  var swaggerFile = resultOfExec.stdout;
-  var searchInit = swaggerFile.indexOf("var options");
-  var searchEnd = swaggerFile.indexOf("url = options.swaggerUrl || url");
-  var bodySwagger = swaggerFile.substring(searchInit, searchEnd);
-
-  console.log(bodySwagger);
-
-  return bodySwagger;
-}
-
-//! Run shell commands:
 // This Automatic Test is for the basic level:
-// Basic level:
-//   Only Api type:  GET
-//   Parameters: Not-required
+//   Basic level:
+//     Only Api type:  GET
+//     Parameters: Not-require
+async function getSwaggerJson(urlSwagger) {
+  let simpleApis = await swaggerScann.getBasicApi(urlSwagger);
 
-async function getBasicApi(urlSwagger) {
-  //
-  //Get Json Swagger preview
-  let bodySwagger = await getPreview(urlSwagger);
-
-  eval(bodySwagger); // Get variable options.
-
-  var paths;
-  try {
-    paths = options.swaggerDoc.paths;
-  } catch (error) {
-    paths = [];
-  }
-
-  //! Rule, serach [GET] Apis with not parmams.
-
-  var pathsName = Object.keys(paths);
-  var pathsForTest = [];
-  var responseList = [];
-  var apiList = [];
-  for (const key in pathsName) {
-    path_i = paths[pathsName[key]];
-    if (Object.keys(path_i)[0] === "get" && pathsName[key].search("{") === -1) {
-      //
-      pathsForTest.push(pathsName[key]);
-      responseList.push(path_i["get"].responses);
-      apiList.push("GET");
-
-      console.log(path_i["get"]);
-    }
-  }
-
-  let outData = {
-    pathsForTest: pathsForTest,
-    responseList: responseList,
-    apiList: apiList,
-  };
-
-  return simpleApis;
+  console.log(simpleApis);
 }
-
-module.exports.getPreview = getPreview;
-module.exports.getBasicApi = getBasicApi;
 
 let urlSwagger =
   "https://edutelling-api-develop.openshift.techgap.it/api/v1/api-docs/";
-
-async function getSwaggerJson(urlSwagger) {
-  // This Automatic Test is for the basic level:
-  // Basic level:
-  //   Only Api type:  GET
-  //   Parameters: Not-require
-  let simpleApis = await getBasicApi(urlSwagger);
-
-  //   console.log(outData);
-}
-
 getSwaggerJson(urlSwagger);
