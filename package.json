@@ -1,6 +1,6 @@
 {
   "name": "swagger-smktest",
-  "version": "0.0.2",
+  "version": "0.0.27",
   "description": "Create smoke test from swagger api",
   "main": "index.js",
   "scripts": {
@@ -24,7 +24,11 @@
   },
   "homepage": "https://github.com/cannavit/swagger-smktest#readme",
   "dependencies": {
+    "axios": "^0.21.1",
+    "https": "^1.0.0",
     "node-fetch": "^2.6.1",
-    "shelljs": "^0.8.4"
+    "ora": "^5.4.0",
+    "shelljs": "^0.8.4",
+    "tty-table": "^4.1.3"
   }
 }

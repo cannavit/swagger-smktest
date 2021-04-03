@@ -20,10 +20,41 @@ Keyworld: Smoke Test, Sporadic failures, automatic, test
 
 # Commands :
 
-| Command library | Description | Example |
-| :-------------- | :---------- | :-----: |
-| .....           | ....        |    -    |
+| Command library | Level | Scann API Type | Parameters |
+| :-------------- | :---- | :------------: | :--------: |
+| getBasicApi     | Basic |      GET       |     NO     |
 
-## Use Example
+## Use Example (getBasicApi)
 
-......
+    const swaggerSmktest = require("swagger-smktest");
+
+    async function example_getBasicApi(urlSwagger) {
+
+      const urlSwagger = "https://petstore.swagger.io/v2/swagger.json";
+
+      let simpleApis = await swaggerSmktest.getBasicApi(urlSwagger);
+
+      console.log(simpleApis)
+
+    }
+
+    yarn install
+
+### Output console:
+
+      pathsForTest: [
+        '/pet/findByStatus',
+        '/pet/findByTags',
+        '/store/inventory',
+        '/user/login',
+        '/user/logout'
+      ]
+
+     responseList: [
+       { '200': [Object], '400': [Object] },
+       { '200': [Object], '400': [Object] },
+       { '200': [Object] },
+       { '200': [Object], '400': [Object] },
+       { default: [Object] }
+    ],
+     apiList: [ 'GET', 'GET', 'GET', 'GET', 'GET' ]
