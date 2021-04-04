@@ -313,7 +313,7 @@ async function smktestBasic(smktestCriterial, urlSwagger) {
       { nameVarialbe: "Number of Cases", value: totalApis },
       { nameVarialbe: "Number of cases processed", value: numberBasicApis },
       { nameVarialbe: "Test Coverage", value: coverage.toFixed(4) },
-      { nameVarialbe: "Pass SmokeTest", value: successSmokeTest },
+      { nameVarialbe: "Pass SmokeTest", value: String(successSmokeTest) },
     ];
 
     let header2 = [
