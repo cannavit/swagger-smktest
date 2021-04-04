@@ -1,5 +1,6 @@
 const shell = require("shelljs");
 const axios = require("axios");
+const Table = require("tty-table");
 
 // function sleep(milliseconds) {
 //   const date = Date.now();
@@ -134,6 +135,8 @@ async function simpleRequest(api, swaggerApis, key) {
   let apiVerb = apiList[key];
 
   let response, responseOutput, passTest, color;
+  let successTest = true;
+
   try {
     // response = await axios.get(api);
     response = await axios.get(api, {
@@ -175,7 +178,6 @@ async function simpleRequest(api, swaggerApis, key) {
       };
     }
   }
-  // console.log(response);
   if (String(responseOutput.status).includes("20")) {
     passTest = "true";
     color = "success";
@@ -184,6 +186,8 @@ async function simpleRequest(api, swaggerApis, key) {
     color = "warning";
   } else if (String(responseOutput.status).includes("50")) {
     passTest = "false";
+    successTest = false;
+
     color = "alert";
   } else if (String(responseOutput.status).includes("60")) {
     passTest = "null";
@@ -193,7 +197,7 @@ async function simpleRequest(api, swaggerApis, key) {
   responseOutput.passTest = passTest;
   responseOutput.color = color;
 
-  return responseOutput;
+  return { successTest, responseOutput };
 }
 
 // const https = require("https");
@@ -205,6 +209,7 @@ async function simpleRequest(api, swaggerApis, key) {
 async function getBasicResponse(urlSwagger) {
   //
   let swaggerApis = await getBasicApi(urlSwagger);
+  let successSmokeTest = true;
 
   let {
     pathsForTest,
@@ -218,25 +223,117 @@ async function getBasicResponse(urlSwagger) {
   } = swaggerApis;
 
   let responseOfRequest = [];
+  let successTest, responseOutput;
 
   for (const key in responseList) {
     //! Api address with https:
     let api = "https://" + host + basePath + pathsForTest[key];
-    let responseOutput = await simpleRequest(api, swaggerApis, key);
+
+    let data = await simpleRequest(api, swaggerApis, key);
+    successTest = data.successTest;
+    responseOutput = data.responseOutput;
+    // { successTest, responseOutput } = data
 
     if (responseOutput.status === 600) {
       api = "http://" + host + basePath + pathsForTest[key];
-      responseOutput = await simpleRequest(api, swaggerApis, key);
+
+      let data = await simpleRequest(api, swaggerApis, key);
+      successTest = data.successTest;
+      responseOutput = data.responseOutput;
+
+      // { successTest, responseOutput } = data
     }
+
+    if (!successTest) {
+      successSmokeTest = false;
+    }
+
     responseOfRequest.push(responseOutput);
   }
 
-  // console.log(responseOfRequest);
   //! Try to exec SmokeTest:
-  return { responseOfRequest, coverage };
+  return {
+    responseOfRequest,
+    coverage,
+    successSmokeTest,
+    totalApis,
+    numberBasicApis,
+  };
+}
+
+async function smktestBasic(smktestCriterial, urlSwagger) {
+  //
+  let responseOfRequest,
+    coverage,
+    successSmokeTest,
+    totalApis,
+    numberBasicApis,
+    report,
+    abstractReport;
+
+  if (smktestCriterial === "basic") {
+    // Basic Criterial
+    let data = await getBasicResponse(urlSwagger);
+    responseOfRequest = data.responseOfRequest;
+    coverage = data.coverage;
+    successSmokeTest = data.successSmokeTest;
+    totalApis = data.totalApis;
+    numberBasicApis = data.numberBasicApis;
+
+    // Header:
+    //! Cases Test report.
+    let header = [
+      { value: "requestUrl", width: 40, alias: "API", align: "left" },
+      { value: "requestMethod", width: 10, alias: "api verbs" },
+      { value: "status", width: 10, alias: "Status" },
+      { value: "data", width: 50, alias: "Data Request", align: "left" },
+      {
+        alias: "Pass Test",
+        value: "passTest",
+        width: 15,
+        color: "red",
+        formatter: function (value) {
+          if (value === "true") {
+            value = this.style(value, "bgGreen", "black");
+          } else if (value === "false") {
+            value = this.style(value, "bgRed", "black");
+          } else {
+            value = this.style(value, "bgBlue", "white");
+          }
+          return value;
+        },
+      },
+    ];
+    const t3 = Table(header, responseOfRequest);
+    report = t3;
+
+    //! SmokeTest abstract report:
+    let smktestAbstract = [
+      { nameVarialbe: "SmokeTest criterial", value: smktestCriterial },
+      { nameVarialbe: "Number of Cases", value: totalApis },
+      { nameVarialbe: "Number of cases processed", value: numberBasicApis },
+      { nameVarialbe: "Test Coverage", value: coverage.toFixed(4) },
+      { nameVarialbe: "Pass SmokeTest", value: successSmokeTest },
+    ];
+
+    let header2 = [
+      { value: "nameVarialbe", width: 40, alias: "Reports", align: "left" },
+      { value: "value", width: 10, alias: "Value", align: "left" },
+    ];
+    abstractReport = Table(header2, smktestAbstract);
+  }
+
+  return {
+    successSmokeTest,
+    responseOfRequest,
+    coverage,
+    report,
+    abstractReport,
+  };
 }
 
 module.exports.getPreview = getPreview;
 module.exports.getBasicApi = getBasicApi;
 module.exports.getBasicResponse = getBasicResponse;
 module.exports.simpleRequest = simpleRequest;
+module.exports.smktestBasic = smktestBasic;

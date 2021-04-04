@@ -34,7 +34,6 @@ Keyworld: Smoke Test, Sporadic failures, automatic, test
 
       let simpleApis = await swaggerSmktest.getBasicApi(urlSwagger);
 
-      console.log(simpleApis)
 
     }
 
@@ -58,3 +57,34 @@ Keyworld: Smoke Test, Sporadic failures, automatic, test
        { default: [Object] }
     ],
      apiList: [ 'GET', 'GET', 'GET', 'GET', 'GET' ]
+
+0
+
+## Example of use with Jest:
+
+1.  Install Jest
+2.  Create jest file: basicSmktest_JestExample.test
+
+3.  Example of basic smokeTest:
+
+    const swaggerSmktest = require("swagger-smktest");
+
+    let urlSwagger = "https://petstore.swagger.io/v2/swagger.json";
+    let smktestCriterial = "basic";
+
+    let {
+    responseOfRequest,
+    coverage,
+    successSmokeTest,
+    report,
+    abstractReport,
+    } = await swaggerSmktest.smktestBasic(smktestCriterial, urlSwagger);
+
+    console.log(report.render());
+    console.log(abstractReport.render());
+
+    });
+
+Console output:
+
+![toolss_200px](/documentation/swagger-smktest.png)
