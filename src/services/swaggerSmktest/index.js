@@ -41,6 +41,7 @@ async function getPreview(urlSwagger) {
     bodySwagger = swaggerFile.substring(searchInit, searchEnd);
 
     isSwaggerJson = false;
+    //
   } else {
     //
     ENDPOINT_SCANN_SWAGGER_FROM = `curl -XGET -H \"accept-language: en\" -H \"Content-type: application/json\" '${urlSwagger}'`;
@@ -63,7 +64,7 @@ async function getPreview(urlSwagger) {
 //   Only Api type:  GET
 //   Parameters: Not-required
 
-async function getBasicApi(urlSwagger) {
+async function getBasicApi(urlSwagger, option = { host: undefined }) {
   //
   //Get Json Swagger preview
   let { bodySwagger, isSwaggerJson } = await getPreview(urlSwagger);
@@ -78,13 +79,26 @@ async function getBasicApi(urlSwagger) {
       paths = options.swaggerDoc.paths;
       basePath = options.swaggerDoc.basePath;
       host = urlSwagger.substr(0, urlSwagger.search(basePath));
-      host = host.substr(urlSwagger.search("//") + 2, host.length);
+
+      //! Select the host if not exist inside to the option:
+      if (!option.host) {
+        host = host.substr(urlSwagger.search("//") + 2, host.length);
+      } else {
+        host = option.host;
+      }
     } catch (error) {
       paths = [];
     }
   } else {
     paths = bodySwagger.paths;
-    host = bodySwagger.host;
+
+    //! Select the host if not exist inside to the option:
+    if (!option.host) {
+      host = bodySwagger.host;
+    } else {
+      host = option.host;
+    }
+
     basePath = bodySwagger.basePath;
   }
 
@@ -111,8 +125,6 @@ async function getBasicApi(urlSwagger) {
       //
     }
   }
-  100 - 10;
-  90;
   let coverage = 1 - (totalApis - numberBasicApis) / totalApis;
 
   return {
@@ -138,9 +150,8 @@ async function simpleRequest(api, swaggerApis, key) {
   let successTest = true;
 
   try {
-    // response = await axios.get(api);
     response = await axios.get(api, {
-      timeout: 500,
+      timeout: 3000,
     });
 
     responseOutput = {
@@ -206,9 +217,9 @@ async function simpleRequest(api, swaggerApis, key) {
 //     Only Api type:  GET
 //     Parameters: Not-require
 
-async function getBasicResponse(urlSwagger) {
+async function getBasicResponse(urlSwagger, option) {
   //
-  let swaggerApis = await getBasicApi(urlSwagger);
+  let swaggerApis = await getBasicApi(urlSwagger, option);
   let successSmokeTest = true;
 
   let {
@@ -258,10 +269,11 @@ async function getBasicResponse(urlSwagger) {
     successSmokeTest,
     totalApis,
     numberBasicApis,
+    host,
   };
 }
 
-async function smktestBasic(smktestCriterial, urlSwagger) {
+async function smktestBasic(smktestCriterial, urlSwagger, option) {
   //
   let responseOfRequest,
     coverage,
@@ -273,12 +285,14 @@ async function smktestBasic(smktestCriterial, urlSwagger) {
 
   if (smktestCriterial === "basic") {
     // Basic Criterial
-    let data = await getBasicResponse(urlSwagger);
+    let data = await getBasicResponse(urlSwagger, option);
+
     responseOfRequest = data.responseOfRequest;
     coverage = data.coverage;
     successSmokeTest = data.successSmokeTest;
     totalApis = data.totalApis;
     numberBasicApis = data.numberBasicApis;
+    host = data.host;
 
     // Header:
     //! Cases Test report.
@@ -310,6 +324,7 @@ async function smktestBasic(smktestCriterial, urlSwagger) {
     //! SmokeTest abstract report:
     let smktestAbstract = [
       { nameVarialbe: "SmokeTest criterial", value: smktestCriterial },
+      { nameVarialbe: "Host", value: host },
       { nameVarialbe: "Number of Cases", value: totalApis },
       { nameVarialbe: "Number of cases processed", value: numberBasicApis },
       { nameVarialbe: "Test Coverage", value: coverage.toFixed(4) },
@@ -317,8 +332,8 @@ async function smktestBasic(smktestCriterial, urlSwagger) {
     ];
 
     let header2 = [
-      { value: "nameVarialbe", width: 40, alias: "Reports", align: "left" },
-      { value: "value", width: 10, alias: "Value", align: "left" },
+      { value: "nameVarialbe", width: 30, alias: "Reports", align: "left" },
+      { value: "value", width: 40, alias: "Value", align: "left" },
     ];
     abstractReport = Table(header2, smktestAbstract);
   }

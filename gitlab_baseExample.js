@@ -1,13 +1,10 @@
 const swaggerSmktest = require("./src/services/swaggerSmktest");
 
-test("Basic Swagger smoke-testing with Jest", async () => {
+test("Basic Swagger smoke-testing with Jest with gitlabnm", async () => {
   //! Is possible use /api-docs
 
-  let urlSwagger =
-    "https://edutelling-api-develop.openshift.techgap.it/api/v1/api-docs/";
-
   //! Its possible use /swagger.json
-  // let urlSwagger = "https://petstore.swagger.io/v2/swagger.json";
+  let urlSwagger = "https://axil.gitlab.io/swaggerapi/static/swagger.json";
   let smktestCriterial = "basic";
 
   let {
@@ -17,8 +14,9 @@ test("Basic Swagger smoke-testing with Jest", async () => {
     report,
     abstractReport,
   } = await swaggerSmktest.smktestBasic(smktestCriterial, urlSwagger);
+
   console.log(report.render());
   console.log(abstractReport.render());
 
   expect(successSmokeTest).toBe(true);
-});
+}, 100000);

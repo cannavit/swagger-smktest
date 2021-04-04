@@ -276,3 +276,5 @@ pme_backup
 .scannerwork
 
 .npmrc
+
+/test
