@@ -58,8 +58,6 @@ Keyworld: Smoke Test, Sporadic failures, automatic, test
     ],
      apiList: [ 'GET', 'GET', 'GET', 'GET', 'GET' ]
 
-0
-
 ## Example of use with Jest:
 
 1.  Install Jest
@@ -67,23 +65,25 @@ Keyworld: Smoke Test, Sporadic failures, automatic, test
 
 3.  Example of basic smokeTest:
 
-    const swaggerSmktest = require("swagger-smktest");
+### Test example with Jest:
 
-    let urlSwagger = "https://petstore.swagger.io/v2/swagger.json";
-    let smktestCriterial = "basic";
+      const swaggerSmktest = require("swagger-smktest");
 
-    let {
-    responseOfRequest,
-    coverage,
-    successSmokeTest,
-    report,
-    abstractReport,
-    } = await swaggerSmktest.smktestBasic(smktestCriterial, urlSwagger);
+      let urlSwagger = "https://petstore.swagger.io/v2/swagger.json";
+      let smktestCriterial = "basic";
 
-    console.log(report.render());
-    console.log(abstractReport.render());
+      let {
+        responseOfRequest,
+        coverage,
+        successSmokeTest,
+        report,
+        abstractReport,
+      } = await swaggerSmktest.smktestBasic(smktestCriterial, urlSwagger);
 
-    });
+      console.log(report.render());
+      console.log(abstractReport.render());
+
+      });
 
 Console output:
 
