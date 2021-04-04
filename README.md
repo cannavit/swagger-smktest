@@ -87,4 +87,4 @@ Keyworld: Smoke Test, Sporadic failures, automatic, test
 
 Console output:
 
-![toolss_200px](/documentation/swagger-smktest.png)
+![toolss_200px](/src/documentation/swagger-smktest.png)
