@@ -7,20 +7,20 @@ test("Basic Swagger smoke-testing with Gitlab apis", async () => {
   let smktestCriterial = "basic";
 
   //! Add options confiugrations for this case
-  let option = {
+  let options = {
     host: "https://gitlab.com",
   };
 
   let {
-    responseOfRequest,
-    coverage,
     successSmokeTest,
     report,
     abstractReport,
-  } = await swaggerSmktest.smktestBasic(smktestCriterial, urlSwagger, option);
+  } = await swaggerSmktest.smktestBasic(smktestCriterial, urlSwagger, options);
 
+  // Print table reports
   console.log(report.render());
   console.log(abstractReport.render());
 
+  // Jest asserts declaration:
   expect(successSmokeTest).toBe(true);
 }, 400000);

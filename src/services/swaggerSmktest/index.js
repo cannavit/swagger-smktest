@@ -64,7 +64,7 @@ async function getPreview(urlSwagger) {
 //   Only Api type:  GET
 //   Parameters: Not-required
 
-async function getBasicApi(urlSwagger, option = { host: undefined }) {
+async function getBasicApi(urlSwagger, options = { host: undefined }) {
   //
   //Get Json Swagger preview
   let { bodySwagger, isSwaggerJson } = await getPreview(urlSwagger);
@@ -81,10 +81,10 @@ async function getBasicApi(urlSwagger, option = { host: undefined }) {
       host = urlSwagger.substr(0, urlSwagger.search(basePath));
 
       //! Select the host if not exist inside to the option:
-      if (!option.host) {
+      if (!options.host) {
         host = host.substr(urlSwagger.search("//") + 2, host.length);
       } else {
-        host = option.host;
+        host = options.host;
       }
     } catch (error) {
       paths = [];
@@ -93,10 +93,10 @@ async function getBasicApi(urlSwagger, option = { host: undefined }) {
     paths = bodySwagger.paths;
 
     //! Select the host if not exist inside to the option:
-    if (!option.host) {
+    if (!options.host) {
       host = bodySwagger.host;
     } else {
-      host = option.host;
+      host = options.host;
     }
 
     basePath = bodySwagger.basePath;
@@ -217,9 +217,9 @@ async function simpleRequest(api, swaggerApis, key) {
 //     Only Api type:  GET
 //     Parameters: Not-require
 
-async function getBasicResponse(urlSwagger, option = { host: undefined }) {
+async function getBasicResponse(urlSwagger, options = { host: undefined }) {
   //
-  let swaggerApis = await getBasicApi(urlSwagger, option);
+  let swaggerApis = await getBasicApi(urlSwagger, options);
   let successSmokeTest = true;
 
   let {
@@ -241,7 +241,7 @@ async function getBasicResponse(urlSwagger, option = { host: undefined }) {
     let api;
     let data;
 
-    if (!option.host) {
+    if (!options.host) {
       api = "https://" + host + basePath + pathsForTest[key];
     } else {
       api = host + basePath + pathsForTest[key];
@@ -278,7 +278,7 @@ async function getBasicResponse(urlSwagger, option = { host: undefined }) {
   };
 }
 
-async function smktestBasic(smktestCriterial, urlSwagger, option) {
+async function smktestBasic(smktestCriterial, urlSwagger, options) {
   //
   let responseOfRequest,
     coverage,
@@ -290,7 +290,7 @@ async function smktestBasic(smktestCriterial, urlSwagger, option) {
 
   if (smktestCriterial === "basic") {
     // Basic Criterial
-    let data = await getBasicResponse(urlSwagger, option);
+    let data = await getBasicResponse(urlSwagger, options);
 
     responseOfRequest = data.responseOfRequest;
     coverage = data.coverage;

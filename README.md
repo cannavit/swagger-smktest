@@ -80,11 +80,51 @@ Keyworld: Smoke Test, Sporadic failures, automatic, test
         abstractReport,
       } = await swaggerSmktest.smktestBasic(smktestCriterial, urlSwagger);
 
+      // Render the APIs SmokeTest report
       console.log(report.render());
+
+      // Render the General report:
       console.log(abstractReport.render());
+
+      // Jest
+      expect(successSmokeTest).toBe(false);
 
       });
 
 Console output:
 
 ![toolss_200px](/src/documentation/swagger-smktest.png)
+
+## Add specific configuration:
+
+If do you need add the specific parameters is possible do it using the variable object "options", how is show it in the following lines:
+
+      const swaggerSmktest = require("swagger-smktest");
+
+      const swaggerSmktest = require("../src/services/swaggerSmktest");
+
+      test("Basic Swagger smoke-testing with Gitlab apis", async () => {
+        //! Is possible use /api-docs
+
+        let urlSwagger = "https://axil.gitlab.io/swaggerapi/static/swagger.json";
+        let smktestCriterial = "basic";
+
+        //! Add options configuration for this case
+        let options = {
+        host: "https://gitlab.com",
+      };
+
+      let {
+         successSmokeTest,
+         report,
+         abstractReport,
+      } = await swaggerSmktest.smktestBasic(smktestCriterial, urlSwagger, options);
+
+      // Print table reports
+      console.log(report.render());
+      console.log(abstractReport.render());
+
+      // Jest asserts declaration:
+      expect(successSmokeTest).toBe(true);
+
+      }, 400000);
