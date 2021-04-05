@@ -1,8 +1,8 @@
-const swaggerSmktest = require("./src/services/swaggerSmktest");
+const swaggerSmktest = require("../src/services/swaggerSmktest");
 
-//! Its possible use /swagger.json
+test("Basic Swagger smoke-testing with Gitlab apis", async () => {
+  //! Is possible use /api-docs
 
-async function test() {
   let urlSwagger = "https://axil.gitlab.io/swaggerapi/static/swagger.json";
   let smktestCriterial = "basic";
 
@@ -11,19 +11,16 @@ async function test() {
     host: "https://gitlab.com",
   };
 
-  //   let data = await swaggerSmktest.getPreview(urlSwagger);
   let {
     responseOfRequest,
     coverage,
     successSmokeTest,
     report,
     abstractReport,
-  } = await swaggerSmktest.smktestBasic("basic", urlSwagger, option);
-
-  // let data = await swaggerSmktest.getPreview(urlSwagger);
+  } = await swaggerSmktest.smktestBasic(smktestCriterial, urlSwagger, option);
 
   console.log(report.render());
   console.log(abstractReport.render());
-}
 
-test();
+  expect(successSmokeTest).toBe(true);
+}, 400000);

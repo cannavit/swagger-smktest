@@ -151,7 +151,7 @@ async function simpleRequest(api, swaggerApis, key) {
 
   try {
     response = await axios.get(api, {
-      timeout: 3000,
+      timeout: 1500,
     });
 
     responseOutput = {
@@ -217,7 +217,7 @@ async function simpleRequest(api, swaggerApis, key) {
 //     Only Api type:  GET
 //     Parameters: Not-require
 
-async function getBasicResponse(urlSwagger, option) {
+async function getBasicResponse(urlSwagger, option = { host: undefined }) {
   //
   let swaggerApis = await getBasicApi(urlSwagger, option);
   let successSmokeTest = true;
@@ -238,21 +238,26 @@ async function getBasicResponse(urlSwagger, option) {
 
   for (const key in responseList) {
     //! Api address with https:
-    let api = "https://" + host + basePath + pathsForTest[key];
+    let api;
+    let data;
 
-    let data = await simpleRequest(api, swaggerApis, key);
+    if (!option.host) {
+      api = "https://" + host + basePath + pathsForTest[key];
+    } else {
+      api = host + basePath + pathsForTest[key];
+    }
+
+    data = await simpleRequest(api, swaggerApis, key);
+
     successTest = data.successTest;
     responseOutput = data.responseOutput;
-    // { successTest, responseOutput } = data
 
     if (responseOutput.status === 600) {
       api = "http://" + host + basePath + pathsForTest[key];
+      data = await simpleRequest(api, swaggerApis, key);
 
-      let data = await simpleRequest(api, swaggerApis, key);
       successTest = data.successTest;
       responseOutput = data.responseOutput;
-
-      // { successTest, responseOutput } = data
     }
 
     if (!successTest) {
