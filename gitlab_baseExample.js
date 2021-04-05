@@ -15,8 +15,8 @@ test("Basic Swagger smoke-testing with Jest with gitlabnm", async () => {
     abstractReport,
   } = await swaggerSmktest.smktestBasic(smktestCriterial, urlSwagger);
 
-  console.log(report.render());
-  console.log(abstractReport.render());
+  // console.log(report.render());
+  // console.log(abstractReport.render());
 
   expect(successSmokeTest).toBe(true);
 }, 100000);

@@ -1,0 +1,13 @@
+2021-04-05_15:25:58.99885 time="2021-04-05T15:25:58Z" level=info msg="redis not configured" environment=production go_version=go1.15.8 instance_id=a337ef9d-ee95-4b48-a6bf-9fa39af45e5e service=registry version=v3.1.0-gitlab
+2021-04-05_15:25:58.99894 time="2021-04-05T15:25:58Z" level=info msg="Starting upload purge in 58m0s" environment=production go_version=go1.15.8 instance_id=a337ef9d-ee95-4b48-a6bf-9fa39af45e5e service=registry version=v3.1.0-gitlab
+2021-04-05_15:25:58.99894 time="2021-04-05T15:25:58Z" level=info msg="using inmemory blob descriptor cache" environment=production go_version=go1.15.8 instance_id=a337ef9d-ee95-4b48-a6bf-9fa39af45e5e service=registry version=v3.1.0-gitlab
+2021-04-05_15:25:58.99965 time="2021-04-05T15:25:58Z" level=info msg="listening on 127.0.0.1:5000" environment=production go_version=go1.15.8 instance_id=a337ef9d-ee95-4b48-a6bf-9fa39af45e5e service=registry version=v3.1.0-gitlab
+2021-04-05_15:27:34.32777 time="2021-04-05T15:27:34Z" level=info msg="attempting to stop server gracefully..." database_drain_timeout=0s http_drain_timeout=0s quit_signal=terminated
+2021-04-05_15:27:34.32787 time="2021-04-05T15:27:34Z" level=info msg="graceful shutdown successful" database_drain_timeout=0s http_drain_timeout=0s quit_signal=terminated
+2021-04-05_15:27:34.34668 time="2021-04-05T15:27:34Z" level=info msg="redis not configured" environment=production go_version=go1.15.8 instance_id=7785cb1c-9a28-4260-8691-dcf0d0d334cd service=registry version=v3.1.0-gitlab
+2021-04-05_15:27:34.34674 time="2021-04-05T15:27:34Z" level=info msg="Starting upload purge in 21m0s" environment=production go_version=go1.15.8 instance_id=7785cb1c-9a28-4260-8691-dcf0d0d334cd service=registry version=v3.1.0-gitlab
+2021-04-05_15:27:34.34675 time="2021-04-05T15:27:34Z" level=info msg="using inmemory blob descriptor cache" environment=production go_version=go1.15.8 instance_id=7785cb1c-9a28-4260-8691-dcf0d0d334cd service=registry version=v3.1.0-gitlab
+2021-04-05_15:27:34.34753 time="2021-04-05T15:27:34Z" level=info msg="listening on 127.0.0.1:5000" environment=production go_version=go1.15.8 instance_id=7785cb1c-9a28-4260-8691-dcf0d0d334cd service=registry version=v3.1.0-gitlab
+2021-04-05_15:48:34.34765 time="2021-04-05T15:48:34Z" level=info msg="PurgeUploads starting: olderThan=2021-03-29 15:48:34.34689793 +0000 UTC m=-603539.986485928, actuallyDelete=true"
+2021-04-05_15:48:34.34770 time="2021-04-05T15:48:34Z" level=info msg="Purge uploads finished.  Num deleted=0, num errors=1"
+2021-04-05_15:48:34.34772 time="2021-04-05T15:48:34Z" level=info msg="Starting upload purge in 24h0m0s" environment=production go_version=go1.15.8 instance_id=7785cb1c-9a28-4260-8691-dcf0d0d334cd service=registry version=v3.1.0-gitlab

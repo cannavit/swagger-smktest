@@ -118,7 +118,13 @@ If do you need add the specific parameters is possible do it using the variable 
         //! Add options configuration for this case
         let options = {
         host: "https://gitlab.com",
-      };
+        changeInsideApiRequest: [
+          {
+            this: "v3",
+            by: "v4",
+          },
+          ],
+        };
 
       let {
          successSmokeTest,

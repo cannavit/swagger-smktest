@@ -9,6 +9,12 @@ test("Basic Swagger smoke-testing with Gitlab apis", async () => {
   //! Add options confiugrations for this case
   let options = {
     host: "https://gitlab.com",
+    changeInsideApiRequest: [
+      {
+        this: "v3",
+        by: "v4",
+      },
+    ],
   };
 
   let {

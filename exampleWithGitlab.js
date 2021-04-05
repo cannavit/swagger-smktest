@@ -7,23 +7,27 @@ async function test() {
   let smktestCriterial = "basic";
 
   //! Add options confiugrations for this case
-  let option = {
-    host: "https://gitlab.com",
+  let options = {
+    host: "http://localhost:10080",
+    changeInsideApiRequest: [
+      {
+        this: "v3",
+        by: "v4",
+      },
+    ],
   };
 
-  //   let data = await swaggerSmktest.getPreview(urlSwagger);
   let {
-    responseOfRequest,
-    coverage,
     successSmokeTest,
     report,
     abstractReport,
-  } = await swaggerSmktest.smktestBasic("basic", urlSwagger, option);
+  } = await swaggerSmktest.smktestBasic(smktestCriterial, urlSwagger, options);
 
-  // let data = await swaggerSmktest.getPreview(urlSwagger);
-
+  // Print table reports
   console.log(report.render());
   console.log(abstractReport.render());
+
+  // Jest asserts declaration:
 }
 
 test();

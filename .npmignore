@@ -278,3 +278,5 @@ pme_backup
 .npmrc
 
 /test
+
+docker-compose.yml

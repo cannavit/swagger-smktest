@@ -139,8 +139,15 @@ async function getBasicApi(urlSwagger, options = { host: undefined }) {
   };
 }
 
-async function simpleRequest(api, swaggerApis, key) {
-  //
+async function simpleRequest(
+  api,
+  swaggerApis,
+  key,
+  options = {
+    host,
+    changeInsideApiRequest,
+  }
+) {
   let { pathsForTest, responseList, apiList, host, basePath } = swaggerApis;
 
   //! Api CURL:
@@ -150,6 +157,15 @@ async function simpleRequest(api, swaggerApis, key) {
   let successTest = true;
 
   try {
+    //Change request api from changeInsideApiRequest
+
+    if (options.changeInsideApiRequest) {
+      for (const key in options.changeInsideApiRequest) {
+        let change = options.changeInsideApiRequest[key];
+        api = api.replace(change.this, change.by);
+      }
+    }
+
     response = await axios.get(api, {
       timeout: 1500,
     });
@@ -216,8 +232,14 @@ async function simpleRequest(api, swaggerApis, key) {
 //   Basic level:
 //     Only Api type:  GET
 //     Parameters: Not-require
-
-async function getBasicResponse(urlSwagger, options = { host: undefined }) {
+// let api = api.replace(options.changeInsideApiRequest.this, options.changeInsideApiRequest.by)
+async function getBasicResponse(
+  urlSwagger,
+  options = {
+    host: undefined,
+    changeInsideApiRequest: undefined,
+  }
+) {
   //
   let swaggerApis = await getBasicApi(urlSwagger, options);
   let successSmokeTest = true;
@@ -238,8 +260,7 @@ async function getBasicResponse(urlSwagger, options = { host: undefined }) {
 
   for (const key in responseList) {
     //! Api address with https:
-    let api;
-    let data;
+    let api, data;
 
     if (!options.host) {
       api = "https://" + host + basePath + pathsForTest[key];
@@ -247,14 +268,14 @@ async function getBasicResponse(urlSwagger, options = { host: undefined }) {
       api = host + basePath + pathsForTest[key];
     }
 
-    data = await simpleRequest(api, swaggerApis, key);
+    data = await simpleRequest(api, swaggerApis, key, options);
 
     successTest = data.successTest;
     responseOutput = data.responseOutput;
 
     if (responseOutput.status === 600) {
       api = "http://" + host + basePath + pathsForTest[key];
-      data = await simpleRequest(api, swaggerApis, key);
+      data = await simpleRequest(api, swaggerApis, key, options);
 
       successTest = data.successTest;
       responseOutput = data.responseOutput;
