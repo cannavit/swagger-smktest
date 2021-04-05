@@ -15,8 +15,8 @@ Keyworld: Smoke Test, Sporadic failures, automatic, test
 
 # Content:
 
-- [Scanner of apis from Swagger](#markdown-header-span-elements)
-- [How use the service with Docker](#markdown-header-span-elements)
+- [Smoke Test Commands](#markdown-header-span-elements)
+- [General Commands](#markdown-header-span-elements)
 
 # Smoke Test Commands :
 
