@@ -18,11 +18,19 @@ Keyworld: Smoke Test, Sporadic failures, automatic, test
 - [Scanner of apis from Swagger](#markdown-header-span-elements)
 - [How use the service with Docker](#markdown-header-span-elements)
 
-# Commands :
+# Smoke Test Commands :
 
 | Command library | Level | Scann API Type | Parameters |
 | :-------------- | :---- | :------------: | :--------: |
 | getBasicApi     | Basic |      GET       |     NO     |
+
+# General Commands
+
+| Command library                             | Description                                               |
+| :------------------------------------------ | :-------------------------------------------------------- |
+| swaggerSmktest.getPreview(urlSwagger)       | Get swagger object of the apis from swagger documentation |
+| swaggerSmktest.getBasicApi(urlSwagger)      | Get list of the apis from swagger documentation           |
+| swaggerSmktest.getBasicResponse(urlSwagger) | Create basic request using "axios.get "                   |
 
 ## Use Example (getBasicApi)
 
@@ -100,8 +108,6 @@ Console output:
 If do you need add the specific parameters is possible do it using the variable object "options", how is show it in the following lines:
 
       const swaggerSmktest = require("swagger-smktest");
-
-      const swaggerSmktest = require("../src/services/swaggerSmktest");
 
       test("Basic Swagger smoke-testing with Gitlab apis", async () => {
         //! Is possible use /api-docs
