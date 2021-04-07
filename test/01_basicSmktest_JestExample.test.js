@@ -4,6 +4,7 @@ test("Basic Swagger smoke-testing with Jest", async () => {
   //! Its possible use /swagger.json
 
   let urlSwagger = "https://petstore.swagger.io/v2/swagger.json";
+
   let smktestCriterial = "basic";
 
   let {
@@ -12,9 +13,10 @@ test("Basic Swagger smoke-testing with Jest", async () => {
     successSmokeTest,
     report,
     abstractReport,
-  } = await swaggerSmktest.smktestBasic(smktestCriterial, urlSwagger);
+  } = await swaggerSmktest.smokeTest(smktestCriterial, urlSwagger);
 
   console.log(report.render());
+
   console.log(abstractReport.render());
 
   expect(successSmokeTest).toBe(true);

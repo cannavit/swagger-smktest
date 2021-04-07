@@ -4,4 +4,4 @@ module.exports.getPreview = swaggerSmktest.getPreview;
 module.exports.getBasicApi = swaggerSmktest.getBasicApi;
 module.exports.getBasicResponse = swaggerSmktest.getBasicResponse;
 module.exports.simpleRequest = swaggerSmktest.simpleRequest;
-module.exports.smktestBasic = swaggerSmktest.smktestBasic;
+module.exports.smokeTest = swaggerSmktest.smokeTest;

@@ -280,3 +280,8 @@ pme_backup
 /test
 
 docker-compose.yml
+
+gitlab-config
+gitlab-data
+gitlab-logs
+gitlab-runner1-config

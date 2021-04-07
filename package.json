@@ -1,6 +1,6 @@
 {
   "name": "swagger-smktest",
-  "version": "0.0.42",
+  "version": "0.0.43",
   "description": "Create smoke test from swagger api",
   "main": "index.js",
   "scripts": {

@@ -1,9 +1,7 @@
-const swaggerSmktest = require("./src/services/swaggerSmktest");
+const swaggerSmktest = require("../src/services/swaggerSmktest");
 
-//! Using Login Access"
-
-async function test() {
-  // let urlSwagger = "https://axil.gitlab.io/swaggerapi/static/swagger.json";
+test("Edutelling: BasicWithAuth Swagger ", async () => {
+  //! Is possible use /api-docs
   let urlSwagger =
     "https://edutelling-api-develop.openshift.techgap.it/api/v1/api-docs/";
 
@@ -31,7 +29,5 @@ async function test() {
   console.log(report.render());
   console.log(abstractReport.render());
 
-  // Jest asserts declaration:
-}
-
-test();
+  expect(successSmokeTest).toBe(true);
+});

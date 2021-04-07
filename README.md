@@ -22,7 +22,7 @@ Keyworld: Smoke Test, Sporadic failures, automatic, test
 
 | Command library | Level | Scann API Type | Parameters |
 | :-------------- | :---- | :------------: | :--------: |
-| getBasicApi     | Basic |      GET       |     NO     |
+| smokeTest       | Basic |      GET       |     NO     |
 
 # General Commands
 
@@ -86,7 +86,7 @@ Keyworld: Smoke Test, Sporadic failures, automatic, test
         successSmokeTest,
         report,
         abstractReport,
-      } = await swaggerSmktest.smktestBasic(smktestCriterial, urlSwagger);
+      } = await swaggerSmktest.smokeTest(smktestCriterial, urlSwagger);
 
       // Render the APIs SmokeTest report
       console.log(report.render());
@@ -130,7 +130,7 @@ If do you need add the specific parameters is possible do it using the variable 
          successSmokeTest,
          report,
          abstractReport,
-      } = await swaggerSmktest.smktestBasic(smktestCriterial, urlSwagger, options);
+      } = await swaggerSmktest.smokeTest(smktestCriterial, urlSwagger, options);
 
       // Print table reports
       console.log(report.render());
@@ -140,3 +140,7 @@ If do you need add the specific parameters is possible do it using the variable 
       expect(successSmokeTest).toBe(true);
 
       }, 400000);
+
+### Referents
+
+https://app.swaggerhub.com/

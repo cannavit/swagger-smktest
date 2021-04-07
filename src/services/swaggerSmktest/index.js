@@ -2,20 +2,20 @@ const shell = require("shelljs");
 const axios = require("axios");
 const Table = require("tty-table");
 
-// function sleep(milliseconds) {
-//   const date = Date.now();
-//   let currentDate = null;
-//   do {
-//     currentDate = Date.now();
-//   } while (currentDate - date < milliseconds);
-// }
+function sleep(milliseconds) {
+  const date = Date.now();
+  let currentDate = null;
+  do {
+    currentDate = Date.now();
+  } while (currentDate - date < milliseconds);
+}
 
 async function getPreview(urlSwagger) {
   //! Init swagger page:
 
-  // let ENDPOINT_SWAGGER_PAGE = `curl -XPOST -H \"accept-language: it\" -H \"Content-type: application/json\" '${urlSwagger}'`;
-  //   await shell.exec(ENDPOINT_SWAGGER_PAGE, { silent: true });
-  //   sleep(500);
+  let ENDPOINT_SWAGGER_PAGE = `curl -XPOST -H \"accept-language: it\" -H \"Content-type: application/json\" '${urlSwagger}'`;
+  await shell.exec(ENDPOINT_SWAGGER_PAGE, { silent: true });
+  sleep(500);
 
   let urlSwaggerJson = urlSwagger.search("swagger.json");
 
@@ -58,6 +58,12 @@ async function getPreview(urlSwagger) {
   return { bodySwagger: bodySwagger, isSwaggerJson: isSwaggerJson };
 }
 
+async function getHeaders(headers, token) {
+  for (const key in headers) {
+    headers[key] = headers[key].replace("TOKEN", token);
+  }
+  return headers;
+}
 //! Run shell commands:
 // This Automatic Test is for the basic level:
 // Basic level:
@@ -146,6 +152,8 @@ async function simpleRequest(
   options = {
     host,
     changeInsideApiRequest,
+    token: {},
+    tokenConfig: { headerTokenVariableName: undefined, headers: undefined },
   }
 ) {
   let { pathsForTest, responseList, apiList, host, basePath } = swaggerApis;
@@ -166,9 +174,34 @@ async function simpleRequest(
       }
     }
 
-    response = await axios.get(api, {
-      timeout: 1500,
-    });
+    //! If headers exist:
+
+    if (options.token) {
+      let headers = await getHeaders(
+        options.tokenConfig.headers,
+        options.token
+      );
+
+      //! If exist token
+
+      if (headers) {
+        //! Using Header configurations:
+
+        // timeout: 5500,
+        response = await axios.get(api, {
+          headers: headers,
+          timeout: 5500,
+        });
+
+        // response = await axios.get(api, {
+        //   headers: headers,
+        // });
+      }
+    } else {
+      response = await axios.get(api, {
+        timeout: 5500,
+      });
+    }
 
     responseOutput = {
       data: JSON.stringify(response.data).substr(0, 200),
@@ -299,7 +332,60 @@ async function getBasicResponse(
   };
 }
 
-async function smktestBasic(smktestCriterial, urlSwagger, options) {
+async function reportSmokeTest(responseOfRequest, smktestAbstract) {
+  //! Cases Test report.
+  let header = [
+    { value: "requestUrl", width: 40, alias: "API", align: "left" },
+    { value: "requestMethod", width: 10, alias: "api verbs" },
+    { value: "status", width: 10, alias: "Status" },
+    { value: "data", width: 50, alias: "Data Request", align: "left" },
+    {
+      alias: "Pass Test",
+      value: "passTest",
+      width: 15,
+      color: "red",
+      formatter: function (value) {
+        if (value === "true") {
+          value = this.style(value, "bgGreen", "black");
+        } else if (value === "false") {
+          value = this.style(value, "bgRed", "black");
+        } else {
+          value = this.style(value, "bgBlue", "white");
+        }
+        return value;
+      },
+    },
+  ];
+
+  let report = Table(header, responseOfRequest);
+
+  let header2 = [
+    { value: "nameVarialbe", width: 30, alias: "Reports", align: "left" },
+    { value: "value", width: 40, alias: "Value", align: "left" },
+  ];
+
+  let abstractReport = Table(header2, smktestAbstract);
+
+  return { report, abstractReport };
+}
+
+async function getToken(urlSwagger, options = { tokenConfig: undefined }) {
+  let token;
+
+  if (options.tokenConfig) {
+    let shellResult = await shell.exec(options.tokenConfig.curlRequest, {
+      silent: true,
+    });
+
+    let shellResultsJson = JSON.parse(shellResult.stdout);
+
+    token = shellResultsJson[options.tokenConfig.tokenVariableName];
+  }
+
+  return token;
+}
+
+async function smokeTest(smktestCriterial, urlSwagger, options = {}) {
   //
   let responseOfRequest,
     coverage,
@@ -307,11 +393,14 @@ async function smktestBasic(smktestCriterial, urlSwagger, options) {
     totalApis,
     numberBasicApis,
     report,
-    abstractReport;
+    abstractReport,
+    data,
+    host,
+    dataReport;
 
   if (smktestCriterial === "basic") {
     // Basic Criterial
-    let data = await getBasicResponse(urlSwagger, options);
+    data = await getBasicResponse(urlSwagger, options);
 
     responseOfRequest = data.responseOfRequest;
     coverage = data.coverage;
@@ -320,49 +409,35 @@ async function smktestBasic(smktestCriterial, urlSwagger, options) {
     numberBasicApis = data.numberBasicApis;
     host = data.host;
 
-    // Header:
-    //! Cases Test report.
-    let header = [
-      { value: "requestUrl", width: 40, alias: "API", align: "left" },
-      { value: "requestMethod", width: 10, alias: "api verbs" },
-      { value: "status", width: 10, alias: "Status" },
-      { value: "data", width: 50, alias: "Data Request", align: "left" },
-      {
-        alias: "Pass Test",
-        value: "passTest",
-        width: 15,
-        color: "red",
-        formatter: function (value) {
-          if (value === "true") {
-            value = this.style(value, "bgGreen", "black");
-          } else if (value === "false") {
-            value = this.style(value, "bgRed", "black");
-          } else {
-            value = this.style(value, "bgBlue", "white");
-          }
-          return value;
-        },
-      },
-    ];
-    const t3 = Table(header, responseOfRequest);
-    report = t3;
+    //! Create report
+  } else if (smktestCriterial === "basicWithAuth") {
+    //! Get Token
+    let token = await getToken(urlSwagger, options);
 
-    //! SmokeTest abstract report:
-    let smktestAbstract = [
-      { nameVarialbe: "SmokeTest criterial", value: smktestCriterial },
-      { nameVarialbe: "Host", value: host },
-      { nameVarialbe: "Number of Cases", value: totalApis },
-      { nameVarialbe: "Number of cases processed", value: numberBasicApis },
-      { nameVarialbe: "Test Coverage", value: coverage.toFixed(4) },
-      { nameVarialbe: "Pass SmokeTest", value: String(successSmokeTest) },
-    ];
+    options.token = token;
 
-    let header2 = [
-      { value: "nameVarialbe", width: 30, alias: "Reports", align: "left" },
-      { value: "value", width: 40, alias: "Value", align: "left" },
-    ];
-    abstractReport = Table(header2, smktestAbstract);
+    data = await getBasicResponse(urlSwagger, options);
+    responseOfRequest = data.responseOfRequest;
+    coverage = data.coverage;
+    successSmokeTest = data.successSmokeTest;
+    totalApis = data.totalApis;
+    numberBasicApis = data.numberBasicApis;
+    host = data.host;
   }
+
+  //! SmokeTest abstract report:
+  let smktestAbstract = [
+    { nameVarialbe: "SmokeTest criterial", value: smktestCriterial },
+    { nameVarialbe: "Host", value: host },
+    { nameVarialbe: "Number of Cases", value: totalApis },
+    { nameVarialbe: "Number of cases processed", value: numberBasicApis },
+    { nameVarialbe: "Test Coverage", value: coverage.toFixed(4) },
+    { nameVarialbe: "Pass SmokeTest", value: String(successSmokeTest) },
+  ];
+
+  dataReport = await reportSmokeTest(responseOfRequest, smktestAbstract);
+  report = dataReport.report;
+  abstractReport = dataReport.abstractReport;
 
   return {
     successSmokeTest,
@@ -377,4 +452,4 @@ module.exports.getPreview = getPreview;
 module.exports.getBasicApi = getBasicApi;
 module.exports.getBasicResponse = getBasicResponse;
 module.exports.simpleRequest = simpleRequest;
-module.exports.smktestBasic = smktestBasic;
+module.exports.smokeTest = smokeTest;

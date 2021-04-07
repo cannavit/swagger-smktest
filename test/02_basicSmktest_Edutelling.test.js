@@ -1,5 +1,5 @@
 const swaggerSmktest = require("../src/services/swaggerSmktest");
-
+//TODO if have one error is beacouse the load of preview have problema. Need change other view before.
 test("Basic Swagger smoke-testing with Jest", async () => {
   //! Is possible use /api-docs
 
@@ -15,7 +15,7 @@ test("Basic Swagger smoke-testing with Jest", async () => {
     successSmokeTest,
     report,
     abstractReport,
-  } = await swaggerSmktest.smktestBasic(smktestCriterial, urlSwagger);
+  } = await swaggerSmktest.smokeTest(smktestCriterial, urlSwagger);
 
   console.log(report.render());
   console.log(abstractReport.render());

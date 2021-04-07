@@ -21,7 +21,7 @@ test("Basic Swagger smoke-testing with Gitlab apis from localhost", async () => 
     successSmokeTest,
     report,
     abstractReport,
-  } = await swaggerSmktest.smktestBasic(smktestCriterial, urlSwagger, options);
+  } = await swaggerSmktest.smokeTest(smktestCriterial, urlSwagger, options);
 
   // Print table reports
   console.log(report.render());
