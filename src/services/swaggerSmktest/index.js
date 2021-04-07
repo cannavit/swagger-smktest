@@ -13,9 +13,9 @@ function sleep(milliseconds) {
 async function getPreview(urlSwagger) {
   //! Init swagger page:
 
-  let ENDPOINT_SWAGGER_PAGE = `curl -XPOST -H \"accept-language: it\" -H \"Content-type: application/json\" '${urlSwagger}'`;
-  await shell.exec(ENDPOINT_SWAGGER_PAGE, { silent: true });
-  sleep(500);
+  // let ENDPOINT_SWAGGER_PAGE = `curl -XGET -H \"accept-language: it\" -H \"Content-type: application/json\" '${urlSwagger}'`;
+  // await shell.exec(ENDPOINT_SWAGGER_PAGE, { silent: false });
+  // sleep(500);
 
   let urlSwaggerJson = urlSwagger.search("swagger.json");
 
@@ -190,7 +190,7 @@ async function simpleRequest(
         // timeout: 5500,
         response = await axios.get(api, {
           headers: headers,
-          timeout: 5500,
+          timeout: 6500,
         });
 
         // response = await axios.get(api, {
@@ -412,6 +412,7 @@ async function smokeTest(smktestCriterial, urlSwagger, options = {}) {
     //! Create report
   } else if (smktestCriterial === "basicWithAuth") {
     //! Get Token
+
     let token = await getToken(urlSwagger, options);
 
     options.token = token;

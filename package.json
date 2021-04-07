@@ -4,7 +4,7 @@
   "description": "Create smoke test from swagger api",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest /test"
   },
   "repository": {
     "type": "git",
