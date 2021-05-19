@@ -449,8 +449,34 @@ async function smokeTest(smktestCriterial, urlSwagger, options = {}) {
   };
 }
 
+async function trainSmokeTest(smktestCriterial, urlSwagger, options = {}) {
+  // let urlSwagger = "https://petstore.swagger.io/v2/swagger.json";
+
+  let smktestCriterial = "basic";
+  let data = await smokeTest(smktestCriterial, urlSwagger, (options = {}));
+
+  let trainData = [];
+
+  for (const key in data.responseOfRequest) {
+    element = data.responseOfRequest[key];
+
+    let dataElement = {
+      type: "swaggerSmkTest",
+      level: smktestCriterial,
+      apiVerb: element.requestMethod,
+      apiTest: element.requestUrl,
+      assertStatusCode: element.status,
+      passTrainingTest: element.passTest,
+      trainingResponse: element.data,
+    };
+
+    trainData.push(dataElement);
+  }
+}
+
 module.exports.getPreview = getPreview;
 module.exports.getBasicApi = getBasicApi;
 module.exports.getBasicResponse = getBasicResponse;
 module.exports.simpleRequest = simpleRequest;
 module.exports.smokeTest = smokeTest;
+module.exports.trainSmokeTest = trainSmokeTest;

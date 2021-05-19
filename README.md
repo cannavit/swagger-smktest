@@ -45,8 +45,6 @@ Keyworld: Smoke Test, Sporadic failures, automatic, test
 
     }
 
-    yarn install
-
 ### Output console:
 
       pathsForTest: [
