@@ -10,52 +10,112 @@ function sleep(milliseconds) {
   } while (currentDate - date < milliseconds);
 }
 
-async function getPreview(urlSwagger) {
-  //! Init swagger page:
+async function processDataOfresultOfExec(options) {
+  let resultOfExec = options.resultOfExec;
 
-  // let ENDPOINT_SWAGGER_PAGE = `curl -XGET -H \"accept-language: it\" -H \"Content-type: application/json\" '${urlSwagger}'`;
-  // await shell.exec(ENDPOINT_SWAGGER_PAGE, { silent: false });
-  // sleep(500);
+  try {
+    // bodySwagger = JSON.stringify(resultOfExec); //TODO check it
 
-  let urlSwaggerJson = urlSwagger.search("swagger.json");
+    let bodySwagger = JSON.parse(resultOfExec);
 
-  let ENDPOINT_SCANN_SWAGGER_FROM,
-    swaggerFile,
-    searchInit,
-    searchEnd,
-    bodySwagger,
-    isSwaggerJson;
+    let isSwaggerJson = true;
 
-  if (urlSwaggerJson === -1) {
-    //? If the URL get not content swagger.json
+    if (!options.processSwaggerData) {
+      options.processSwaggerData = {};
+    }
 
-    ENDPOINT_SCANN_SWAGGER_FROM = `curl -XGET -H \"accept-language: it\" -H \"Content-type: application/json\" '${urlSwagger}/swagger-ui-init.js'`;
-
-    resultOfExec = await shell.exec(ENDPOINT_SCANN_SWAGGER_FROM, {
-      silent: true,
-    });
-
-    swaggerFile = resultOfExec.stdout;
-    searchInit = swaggerFile.indexOf("var options");
-    searchEnd = swaggerFile.indexOf("url = options.swaggerUrl || url");
-    bodySwagger = swaggerFile.substring(searchInit, searchEnd);
-
-    isSwaggerJson = false;
-    //
-  } else {
-    //
-    ENDPOINT_SCANN_SWAGGER_FROM = `curl -XGET -H \"accept-language: en\" -H \"Content-type: application/json\" '${urlSwagger}'`;
-
-    resultOfExec = await shell.exec(ENDPOINT_SCANN_SWAGGER_FROM, {
-      silent: true,
-    });
-
-    bodySwagger = JSON.stringify(resultOfExec);
-    bodySwagger = JSON.parse(resultOfExec);
-    isSwaggerJson = true;
+    options.processSwaggerData.bodySwagger = bodySwagger;
+    options.processSwaggerData.isSwaggerJson = isSwaggerJson;
+  } catch (error) {
+    console.log("@1Marker-No:_1507067606");
   }
 
-  return { bodySwagger: bodySwagger, isSwaggerJson: isSwaggerJson };
+  return options;
+}
+async function swaggerNotHaveJson(options) {
+  //? Case edutelling.
+
+  //!Check first edutelling format.
+  let ENDPOINT_SCANN_SWAGGER_FROM = `curl -XGET -H \"accept-language: it\" -H \"Content-type: application/json\" '${options.urlSwagger}/swagger-ui-init.js'`;
+
+  let resultOfExec = await shell.exec(ENDPOINT_SCANN_SWAGGER_FROM, {
+    silent: true,
+  });
+
+  if (resultOfExec.stdout.length > 400) {
+    options.resultOfExec = resultOfExec;
+    options = processDataOfresultOfExec(options);
+  }
+
+  // NOT USE SWAGGER LIBRARY
+
+  return options;
+}
+
+async function swaggerHaveJson(options) {
+  let ENDPOINT_SCANN_SWAGGER_FROM = `curl -XGET -H \"accept-language: en\" -H \"Content-type: application/json\" '${options.urlSwagger}'`;
+
+  options.resultOfExec = await shell.exec(ENDPOINT_SCANN_SWAGGER_FROM, {
+    silent: true,
+  });
+
+  //! URL SWAGGER DIRECT
+  options = processDataOfresultOfExec(options);
+
+  return options;
+}
+
+async function getPreview(options) {
+  //
+  //! Init swagger page:
+
+  return await swaggerNotHaveJson(options)
+    .then(async (options) => {
+      if (!options.resultOfExec) {
+        ENDPOINT_SCANN_SWAGGER_FROM = `curl -XGET -H \"accept-language: it\" -H \"Content-type: application/json\" '${urlSwagger}'`;
+
+        options.resultOfExec = await shell.exec(ENDPOINT_SCANN_SWAGGER_FROM, {
+          silent: true,
+        });
+
+        options = processDataOfresultOfExec(options);
+      }
+
+      return options;
+    })
+    .then((options) => {
+      //! Is not is swagger.json format.
+
+      let swaggerFile = options.resultOfExec.stdout;
+      let searchInit = swaggerFile.indexOf("var options");
+
+      if (searchInit !== -1) {
+        searchEnd = swaggerFile.indexOf("url = options.swaggerUrl || url");
+        bodySwagger = swaggerFile.substring(searchInit, searchEnd);
+        isSwaggerJson = false;
+
+        if (!options.processSwaggerData) {
+          options.processSwaggerData = {};
+        }
+        options.processSwaggerData.swaggerFile = options.resultOfExec.stdout;
+        options.processSwaggerData.searchInit = searchInit;
+        options.processSwaggerData.searchEnd = searchEnd;
+        options.processSwaggerData.bodySwagger = bodySwagger;
+        options.processSwaggerData.resultOfExec = options.resultOfExec;
+      }
+
+      return options;
+    })
+    .then((options) => {
+      //? Get original swagger format
+      //! ***** Swagger with json file here>
+
+      if (options.resultOfExec.stdout === "") {
+        options = swaggerHaveJson(options);
+      }
+
+      return options;
+    });
 }
 
 async function getHeaders(headers, token) {
@@ -70,15 +130,17 @@ async function getHeaders(headers, token) {
 //   Only Api type:  GET
 //   Parameters: Not-required
 
-async function getBasicApi(urlSwagger, options = { host: undefined }) {
-  //
-  //Get Json Swagger preview
-  let { bodySwagger, isSwaggerJson } = await getPreview(urlSwagger);
+async function getBasicApi(options) {
+  urlSwagger = options.urlSwagger;
+
+  options = await getPreview(options);
+
+  let bodySwagger = options.processSwaggerData.bodySwagger;
+  let isSwaggerJson = options.processSwaggerData.isSwaggerJson;
 
   let paths, host, basePath;
 
   if (!isSwaggerJson) {
-    //
     eval(bodySwagger); // Get variable options.
 
     try {
@@ -192,10 +254,6 @@ async function simpleRequest(
           headers: headers,
           timeout: 6500,
         });
-
-        // response = await axios.get(api, {
-        //   headers: headers,
-        // });
       }
     } else {
       response = await axios.get(api, {
@@ -260,21 +318,11 @@ async function simpleRequest(
   return { successTest, responseOutput };
 }
 
-// const https = require("https");
-// This Automatic Test is for the basic level
-//   Basic level:
-//     Only Api type:  GET
-//     Parameters: Not-require
-// let api = api.replace(options.changeInsideApiRequest.this, options.changeInsideApiRequest.by)
-async function getBasicResponse(
-  urlSwagger,
-  options = {
-    host: undefined,
-    changeInsideApiRequest: undefined,
-  }
-) {
+async function getBasicResponse(options) {
   //
-  let swaggerApis = await getBasicApi(urlSwagger, options);
+  let urlSwagger = options.urlSwagger;
+
+  let swaggerApis = await getBasicApi(options);
   let successSmokeTest = true;
 
   let {
@@ -322,14 +370,17 @@ async function getBasicResponse(
   }
 
   //! Try to exec SmokeTest:
-  return {
-    responseOfRequest,
-    coverage,
-    successSmokeTest,
-    totalApis,
-    numberBasicApis,
-    host,
+
+  options.basicResponse = {
+    responseOfRequest: responseOfRequest,
+    coverage: coverage,
+    successSmokeTest: successSmokeTest,
+    totalApis: totalApis,
+    numberBasicApis: numberBasicApis,
+    host: host,
   };
+
+  return options;
 }
 
 async function reportSmokeTest(responseOfRequest, smktestAbstract) {
@@ -369,9 +420,9 @@ async function reportSmokeTest(responseOfRequest, smktestAbstract) {
   return { report, abstractReport };
 }
 
-async function getToken(urlSwagger, options = { tokenConfig: undefined }) {
-  let token;
-
+async function getToken(options) {
+  let tokenVariable, tokenValue, token, bearerVariable;
+  let bearerValue = "";
   if (options.tokenConfig) {
     let shellResult = await shell.exec(options.tokenConfig.curlRequest, {
       silent: true,
@@ -379,13 +430,39 @@ async function getToken(urlSwagger, options = { tokenConfig: undefined }) {
 
     let shellResultsJson = JSON.parse(shellResult.stdout);
 
-    token = shellResultsJson[options.tokenConfig.tokenVariableName];
+    let nameKey = Object.keys(shellResultsJson);
+
+    for (const key in nameKey) {
+      let name = nameKey[key];
+      let value = shellResultsJson[name];
+
+      if (value.length > 100) {
+        tokenVariable = name;
+        tokenValue = value;
+      }
+
+      try {
+        if (value.toLowerCase() === "bearer") {
+          bearerVariable = name;
+          bearerValue = value;
+        }
+      } catch (error) {
+        errorDetected = true;
+      }
+    }
   }
 
-  return token;
+  options.tokenObj = {
+    tokenValue: tokenValue,
+    tokenVariable: tokenVariable,
+    bearerValue: bearerValue,
+    bearerVariable: bearerVariable,
+  };
+
+  return options;
 }
 
-async function smokeTest(smktestCriterial, urlSwagger, options = {}) {
+async function smokeTest(smktestCriterial, urlSwagger, options) {
   //
   let responseOfRequest,
     coverage,
@@ -396,34 +473,45 @@ async function smokeTest(smktestCriterial, urlSwagger, options = {}) {
     abstractReport,
     data,
     host,
-    dataReport;
+    dataReport,
+    token;
+
+  if (!options) {
+    options = {};
+  }
+
+  options.urlSwagger = urlSwagger;
+  options.smktestCriterial = smktestCriterial;
 
   if (smktestCriterial === "basic") {
     // Basic Criterial
-    data = await getBasicResponse(urlSwagger, options);
 
-    responseOfRequest = data.responseOfRequest;
-    coverage = data.coverage;
-    successSmokeTest = data.successSmokeTest;
-    totalApis = data.totalApis;
-    numberBasicApis = data.numberBasicApis;
-    host = data.host;
+    options.urlSwagger = urlSwagger;
+
+    options = await getBasicResponse(options);
+
+    responseOfRequest = options.basicResponse.responseOfRequest;
+    coverage = options.basicResponse.coverage;
+    successSmokeTest = options.basicResponse.successSmokeTest;
+    totalApis = options.basicResponse.totalApis;
+    numberBasicApis = options.basicResponse.numberBasicApis;
+    host = options.basicResponse.host;
 
     //! Create report
   } else if (smktestCriterial === "basicWithAuth") {
     //! Get Token
 
-    let token = await getToken(urlSwagger, options);
+    options = await getToken(options);
+    options.token = options.tokenObj.tokenValue;
 
-    options.token = token;
+    options = await getBasicResponse(options);
 
-    data = await getBasicResponse(urlSwagger, options);
-    responseOfRequest = data.responseOfRequest;
-    coverage = data.coverage;
-    successSmokeTest = data.successSmokeTest;
-    totalApis = data.totalApis;
-    numberBasicApis = data.numberBasicApis;
-    host = data.host;
+    responseOfRequest = options.basicResponse.responseOfRequest;
+    coverage = options.basicResponse.coverage;
+    successSmokeTest = options.basicResponse.successSmokeTest;
+    totalApis = options.basicResponse.totalApis;
+    numberBasicApis = options.basicResponse.numberBasicApis;
+    host = options.basicResponse.host;
   }
 
   //! SmokeTest abstract report:
@@ -446,32 +534,89 @@ async function smokeTest(smktestCriterial, urlSwagger, options = {}) {
     coverage,
     report,
     abstractReport,
+    token,
   };
 }
 
-async function trainSmokeTest(smktestCriterial, urlSwagger, options = {}) {
-  // let urlSwagger = "https://petstore.swagger.io/v2/swagger.json";
+// async function trainSmokeTest(smktestCriterial, urlSwagger, options = {}) {
+async function trainSmokeTest() {
+  //!
 
-  let smktestCriterial = "basic";
-  let data = await smokeTest(smktestCriterial, urlSwagger, (options = {}));
+  // //! TEST 01 ---- >>>>
+  // let data = await smokeTest(
+  //   "basic",
+  //   "https://petstore.swagger.io/v2/swagger.json"
+  // );
+  // //! <<<<<
 
-  let trainData = [];
+  let data = await smokeTest(
+    "basic",
+    "https://edutelling-api-develop.openshift.techgap.it/api/v1/api-docs/"
+  );
 
-  for (const key in data.responseOfRequest) {
-    element = data.responseOfRequest[key];
+  // let optionsSwagger = {
+  //   tokenConfig: {
+  //     curlRequest: `curl -X POST "https://edutelling-api-develop.openshift.techgap.it/api/v1/auth/authentication" -H "accept: application/json" -H "Content-Type: application/json" -d '{ \"email\": \"formazione@edutelling.it\", \"password\": \"Passw0rd\", \"stayLogged\": false }'`,
+  //     tokenVariableName: "token",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       "accept-language": "en",
+  //       Authorization: "Bearer TOKEN",
+  //     },
+  //   },
+  // };
 
-    let dataElement = {
-      type: "swaggerSmkTest",
-      level: smktestCriterial,
-      apiVerb: element.requestMethod,
-      apiTest: element.requestUrl,
-      assertStatusCode: element.status,
-      passTrainingTest: element.passTest,
-      trainingResponse: element.data,
-    };
+  // let data = await smokeTest(
+  //   "basicWithAuth",
+  //   "https://edutelling-api-develop.openshift.techgap.it/api/v1/api-docs/",
+  //   optionsSwagger
+  // );
 
-    trainData.push(dataElement);
-  }
+  // let optionsSwagger = {
+  //   tokenConfig: {
+  //     curlRequest:
+  //       'curl -X POST "https://pot-uat.paxitalia.com:8443/api/public/auth/signin" -H "accept: */*" -H "Content-Type: application/json" -d "{ \\"password\\": \\"AdminPOT\\", \\"usernameOrEmail\\": \\"AdminPOT\\"}"',
+  //     tokenVariableName: "token",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       "accept-language": "en",
+  //       Authorization: "Bearer TOKEN",
+  //     },
+  //   },
+  // };
+
+  // let data = await smokeTest(
+  //   "basicWithAuth",
+  //   "https://pot-uat.paxitalia.com:8443/api/v2/api-docs",
+  //   optionsSwagger
+  // );
+
+  // console.log(">>>>>1078952754>>>>>");
+  // console.log(data);
+  // console.log("<<<<<<<<<<<<<<<<<<<");
+  //! >>>>>>>>>>>>>>>
+
+  // let data = await smokeTest(smktestCriterial, urlSwagger, (options = {}));
+
+  // let trainData = [];
+
+  // for (const key in data.responseOfRequest) {
+  //   element = data.responseOfRequest[key];
+
+  //   let dataElement = {
+  //     type: "swaggerSmkTest",
+  //     level: smktestCriterial,
+  //     apiVerb: element.requestMethod,
+  //     apiTest: element.requestUrl,
+  //     assertStatusCode: element.status,
+  //     passTrainingTest: element.passTest,
+  //     trainingResponse: element.data,
+  //   };
+
+  //   trainData.push(dataElement);
+  // }
+
+  // return trainData;
 }
 
 module.exports.getPreview = getPreview;
@@ -480,3 +625,5 @@ module.exports.getBasicResponse = getBasicResponse;
 module.exports.simpleRequest = simpleRequest;
 module.exports.smokeTest = smokeTest;
 module.exports.trainSmokeTest = trainSmokeTest;
+
+trainSmokeTest();
