@@ -712,68 +712,10 @@ async function smokeTest(urlSwagger, options) {
 // async function trainSmokeTest(smktestCriterial, urlSwagger, options = {}) {
 async function trainSmokeTest() {
   //!
-
-  //! Test 03 >>>>>>>>>
-  let options = {
-    tokenConfig: {
-      curlRequest: `curl -X POST "https://edutelling-api-develop.openshift.techgap.it/api/v1/auth/authentication" -H "accept: application/json" -H "Content-Type: application/json" -d '{ \"email\": \"formazione@edutelling.it\", \"password\": \"Passw0rd\", \"stayLogged\": false }'`,
-    },
-  };
-
-  let data = await smokeTest(
-    "https://edutelling-api-develop.openshift.techgap.it/api/v1/api-docs/",
-    options
-  );
-  // //! Test 04 >>>>>>>>>
-  // let options = {
-  //   tokenConfig: {
-  //     curlRequest:
-  //       'curl -X POST "https://pot-uat.paxitalia.com:8443/api/public/auth/signin" -H "accept: */*" -H "Content-Type: application/json" -d "{ \\"password\\": \\"AdminPOT\\", \\"usernameOrEmail\\": \\"AdminPOT\\"}"',
-  //   },
-  // };
-
-  // let data = await smokeTest(
-  //   "basicWithAuth",
-  //   "https://pot-uat.paxitalia.com:8443/api/v2/api-docs",
-  //   options
-  // );
-
-  //! <<<<<<<<
-  console.log(">>>>>-381661556>>>>>");
-  console.log(data);
-  console.log("<<<<<<<<<<<<<<<<<<<");
-
-  // let optionsSwagger = {
-  //   tokenConfig: {
-  //     curlRequest:
-  //       'curl -X POST "https://pot-uat.paxitalia.com:8443/api/public/auth/signin" -H "accept: */*" -H "Content-Type: application/json" -d "{ \\"password\\": \\"AdminPOT\\", \\"usernameOrEmail\\": \\"AdminPOT\\"}"',
-  //     tokenVariableName: "token",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       "accept-language": "en",
-  //       Authorization: "Bearer TOKEN",
-  //     },
-  //   },
-  // };
-
-  // let data = await smokeTest(
-  //   "basicWithAuth",
-  //   "https://pot-uat.paxitalia.com:8443/api/v2/api-docs",
-  //   optionsSwagger
-  // );
-
-  // console.log(">>>>>1078952754>>>>>");
-  // console.log(data);
-  // console.log("<<<<<<<<<<<<<<<<<<<");
-  //! >>>>>>>>>>>>>>>
-
   // let data = await smokeTest(smktestCriterial, urlSwagger, (options = {}));
-
   // let trainData = [];
-
   // for (const key in data.responseOfRequest) {
   //   element = data.responseOfRequest[key];
-
   //   let dataElement = {
   //     type: "swaggerSmkTest",
   //     level: smktestCriterial,
@@ -783,10 +725,8 @@ async function trainSmokeTest() {
   //     passTrainingTest: element.passTest,
   //     trainingResponse: element.data,
   //   };
-
   //   trainData.push(dataElement);
   // }
-
   // return trainData;
 }
 

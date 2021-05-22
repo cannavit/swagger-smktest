@@ -1,4 +1,4 @@
-const swaggerSmktest = require("../src/services/swaggerSmktest");
+const swaggerSmktest = require("./src/services/swaggerSmktest");
 
 test("Basic Swagger smoke-testing with Jest", async () => {
   //! Its possible use /swagger.json

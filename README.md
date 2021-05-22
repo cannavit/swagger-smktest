@@ -76,7 +76,6 @@ Keyworld: Smoke Test, Sporadic failures, automatic, test
       const swaggerSmktest = require("swagger-smktest");
 
       let urlSwagger = "https://petstore.swagger.io/v2/swagger.json";
-      let smktestCriterial = "basic";
 
       let {
         responseOfRequest,
@@ -84,7 +83,7 @@ Keyworld: Smoke Test, Sporadic failures, automatic, test
         successSmokeTest,
         report,
         abstractReport,
-      } = await swaggerSmktest.smokeTest(smktestCriterial, urlSwagger);
+      } = await swaggerSmktest.smokeTest(urlSwagger);
 
       // Render the APIs SmokeTest report
       console.log(report.render());
@@ -100,44 +99,6 @@ Keyworld: Smoke Test, Sporadic failures, automatic, test
 Console output:
 
 ![toolss_200px](/src/documentation/swagger-smktest.png)
-
-## Add specific configuration:
-
-If do you need add the specific parameters is possible do it using the variable object "options", how is show it in the following lines:
-
-      const swaggerSmktest = require("swagger-smktest");
-
-      test("Basic Swagger smoke-testing with Gitlab apis", async () => {
-        //! Is possible use /api-docs
-
-        let urlSwagger = "https://axil.gitlab.io/swaggerapi/static/swagger.json";
-        let smktestCriterial = "basic";
-
-        //! Add options configuration for this case
-        let options = {
-        host: "https://gitlab.com",
-        changeInsideApiRequest: [
-          {
-            this: "v3",
-            by: "v4",
-          },
-          ],
-        };
-
-      let {
-         successSmokeTest,
-         report,
-         abstractReport,
-      } = await swaggerSmktest.smokeTest(smktestCriterial, urlSwagger, options);
-
-      // Print table reports
-      console.log(report.render());
-      console.log(abstractReport.render());
-
-      // Jest asserts declaration:
-      expect(successSmokeTest).toBe(true);
-
-      }, 400000);
 
 ### Referents
 
