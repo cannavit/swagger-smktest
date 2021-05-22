@@ -26,9 +26,7 @@ async function processDataOfresultOfExec(options) {
 
     options.processSwaggerData.bodySwagger = bodySwagger;
     options.processSwaggerData.isSwaggerJson = isSwaggerJson;
-  } catch (error) {
-    console.log("@1Marker-No:_1507067606");
-  }
+  } catch (error) {}
 
   return options;
 }
@@ -630,7 +628,6 @@ async function smokeTest(urlSwagger, options) {
 
   try {
     if (!options.tokenConfig.curlRequest) {
-      console.log("@1Marker-No:_-1043019011");
       smktestCriterial = "basic";
     } else {
       smktestCriterial = "basicWithAuth";
@@ -712,22 +709,22 @@ async function smokeTest(urlSwagger, options) {
 // async function trainSmokeTest(smktestCriterial, urlSwagger, options = {}) {
 async function trainSmokeTest() {
   //!
-  // let data = await smokeTest(smktestCriterial, urlSwagger, (options = {}));
-  // let trainData = [];
-  // for (const key in data.responseOfRequest) {
-  //   element = data.responseOfRequest[key];
-  //   let dataElement = {
-  //     type: "swaggerSmkTest",
-  //     level: smktestCriterial,
-  //     apiVerb: element.requestMethod,
-  //     apiTest: element.requestUrl,
-  //     assertStatusCode: element.status,
-  //     passTrainingTest: element.passTest,
-  //     trainingResponse: element.data,
-  //   };
-  //   trainData.push(dataElement);
-  // }
-  // return trainData;
+  let data = await smokeTest(smktestCriterial, urlSwagger, (options = {}));
+  let trainData = [];
+  for (const key in data.responseOfRequest) {
+    element = data.responseOfRequest[key];
+    let dataElement = {
+      type: "swaggerSmkTest",
+      level: smktestCriterial,
+      apiVerb: element.requestMethod,
+      apiTest: element.requestUrl,
+      assertStatusCode: element.status,
+      passTrainingTest: element.passTest,
+      trainingResponse: element.data,
+    };
+    trainData.push(dataElement);
+  }
+  return trainData;
 }
 
 module.exports.getPreview = getPreview;
