@@ -707,15 +707,15 @@ async function smokeTest(urlSwagger, options) {
 }
 
 // async function trainSmokeTest(smktestCriterial, urlSwagger, options = {}) {
-async function trainSmokeTest() {
+async function trainSmokeTest(urlSwagger, options) {
   //!
-  let data = await smokeTest(smktestCriterial, urlSwagger, (options = {}));
+  let data = await smokeTest(urlSwagger, options);
+
   let trainData = [];
   for (const key in data.responseOfRequest) {
     element = data.responseOfRequest[key];
     let dataElement = {
       type: "swaggerSmkTest",
-      level: smktestCriterial,
       apiVerb: element.requestMethod,
       apiTest: element.requestUrl,
       assertStatusCode: element.status,
@@ -727,11 +727,22 @@ async function trainSmokeTest() {
   return trainData;
 }
 
+// async function test() {
+//   console.log("@1Marker-No:_354467327");
+//   let data = await trainSmokeTest(
+//     "https://edutelling-api-develop.openshift.techgap.it/api/v1/api-docs/"
+//   );
+
+//   console.log(">>>>>425065162>>>>>");
+//   console.log(data);
+//   console.log("<<<<<<<<<<<<<<<<<<<");
+// }
+
+// test();
+
 module.exports.getPreview = getPreview;
 module.exports.getBasicApi = getBasicApi;
 module.exports.getBasicResponse = getBasicResponse;
 module.exports.simpleRequest = simpleRequest;
 module.exports.smokeTest = smokeTest;
 module.exports.trainSmokeTest = trainSmokeTest;
-
-// trainSmokeTest();
