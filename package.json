@@ -25,6 +25,7 @@
   "homepage": "https://github.com/cannavit/swagger-smktest#readme",
   "dependencies": {
     "axios": "^0.21.1",
+    "dotenv": "^10.0.0",
     "node-fetch": "^2.6.1",
     "shelljs": "^0.8.4",
     "tty-table": "^4.1.3"

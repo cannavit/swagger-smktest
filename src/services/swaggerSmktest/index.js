@@ -1,7 +1,7 @@
 const shell = require("shelljs");
 const axios = require("axios");
 const Table = require("tty-table");
-
+const https = require("https");
 function sleep(milliseconds) {
   const date = Date.now();
   let currentDate = null;
@@ -65,6 +65,8 @@ async function swaggerHaveJson(options) {
   return options;
 }
 
+// GET DOCUMENATATION DATA >>>>>>>>>>>>>>>>>
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 async function getPreview(options) {
   //
   //! Init swagger page:
@@ -109,7 +111,6 @@ async function getPreview(options) {
     .then((options) => {
       //? Get original swagger format
       //! ***** Swagger with json file here>
-
       if (options.resultOfExec.stdout === "") {
         options = swaggerHaveJson(options);
       }
@@ -118,17 +119,168 @@ async function getPreview(options) {
     });
 }
 
-async function getHeaders(headers, token) {
-  for (const key in headers) {
-    headers[key] = headers[key].replace("TOKEN", token);
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+async function getHeadersFromCURL(options, searchBy) {
+  let curl = options.tokenConfig.curlRequest;
+
+  //! Check if exist header:
+  // let searchBy = "-H";
+  let headerData = [];
+  if (curl.includes(searchBy)) {
+    curl = curl.substring(curl.search("-H"), curl.length - 1);
+    curl = curl.split('"');
+
+    let saveHeader = false;
+    for (const key in curl) {
+      const element = curl[key];
+
+      if (saveHeader) {
+        headerData.push(element);
+        saveHeader = false;
+      }
+      if (element.replace(" ", "").replace(" ", "") === searchBy) {
+        saveHeader = true;
+      }
+    }
   }
-  return headers;
+
+  //! Convert Header List in Object:
+  let headerObj = {};
+  for (const key in headerData) {
+    const element = headerData[key];
+    let data = element.split(":");
+    headerObj[data[0].replace(" ", "")] = data[1].replace(" ", "");
+  }
+
+  //! Add token inside of the headers
+  if (options.tokenObj.tokenVariable) {
+    headerObj[options.tokenObj.tokenVariable] = options.token;
+  } else {
+    headerObj["Authorization"] = options.token;
+  }
+
+  options.headers = headerObj;
+
+  return options;
+}
+
+async function getHeaders(options) {
+  //! GET HEADERS:
+
+  options = await getHeadersFromCURL(options, "-H");
+
+  return options;
 }
 //! Run shell commands:
-// This Automatic Test is for the basic level:
-// Basic level:
-//   Only Api type:  GET
-//   Parameters: Not-required
+
+async function executeAxiosGetHeader(options) {
+  let response = {};
+  options.isAxiosError = false;
+
+  try {
+    response = await axios.get(options.api, {
+      headers: options.headers,
+      timeout: 6500,
+    });
+    options.response = response;
+    options.isAxiosError = false;
+  } catch (error) {
+    options.response = error.response;
+    options.isAxiosError = error.isAxiosError;
+  }
+
+  return options;
+}
+
+async function executeApiGETwithHeader(options) {
+  return (
+    executeAxiosGetHeader(options)
+      //? Try request with Bearer
+      .then(async (options) => {
+        if (options.isAxiosError) {
+          headers = options.headers;
+          //! Try axios get respose with Bearer:
+          headers.token = "Bearer " + options.headers.token;
+          try {
+            response = await axios.get(options.api, {
+              headers: headers,
+              timeout: 6500,
+            });
+
+            options.isAxiosError = false;
+            options.response = response;
+          } catch (error) {
+            options.isAxiosError = error.isAxiosError;
+            options.response = error.response;
+          }
+        }
+
+        return options;
+      })
+      .then(async (options) => {
+        //! With out Bearer
+        // curl -X GET "https://pot-uat.paxitalia.com:8443/api/private/authorities" -H "accept: */*" -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjIxNjc5MDI5LCJleHAiOjE2MjE3MTE0MjksIlJPTEVTIjpbIlJPTEVfQ09NUEFOWV9BRE1JTiJdfQ.ZEDJA3FlyaQa7k9WdZdSfKAXeEI2P4_jBXm7biX7_dqj4_5HJsgXxDzKrd5YNRwE-tEKAH-6TpUe6zMviBcCbA"
+        let requestStrategies = [
+          { tokenName: "Authorization", useBearer: false, useHeader: true },
+          { tokenName: "Authorization", useBearer: true, useHeader: true },
+        ];
+
+        axios.defaults.httpsAgent = new https.Agent({
+          rejectUnauthorized: false,
+        });
+
+        for (const key in requestStrategies) {
+          let response;
+          let element = requestStrategies[key];
+          let optionsCopy = options;
+
+          //! <<<<< Only if is error >>>>>>
+          if (options.isAxiosError || options.isAxiosError === undefined) {
+            //! Add Bearer if is necessary:
+            if (element.useBearer) {
+              if (!options.tokenObj.tokenValue.includes("Bearer")) {
+                optionsCopy.headers[optionsCopy.tokenObj.tokenVariable] =
+                  "Bearer " + options.tokenObj.tokenValue;
+              }
+            } else {
+              optionsCopy.headers[optionsCopy.tokenObj.tokenVariable] =
+                options.tokenObj.tokenValue;
+            }
+            //! Create name token variable:
+
+            optionsCopy.headers[element.tokenName] =
+              optionsCopy.headers[optionsCopy.tokenObj.tokenVariable];
+
+            delete optionsCopy.headers[optionsCopy.tokenObj.tokenVariable];
+            delete optionsCopy.headers.token;
+
+            // curl -X GET "https://pot-uat.paxitalia.com:8443/api/private/authorities" -H "accept: */*" -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjIxNjc5MDI5LCJleHAiOjE2MjE3MTE0MjksIlJPTEVTIjpbIlJPTEVfQ09NUEFOWV9BRE1JTiJdfQ.ZEDJA3FlyaQa7k9WdZdSfKAXeEI2P4_jBXm7biX7_dqj4_5HJsgXxDzKrd5YNRwE-tEKAH-6TpUe6zMviBcCbA"
+
+            try {
+              response = await axios.get(options.api, {
+                headers: optionsCopy.headers,
+                timeout: 7500,
+              });
+              options.isAxiosError = false;
+              options.headers = headers;
+              options.response = response;
+            } catch (error) {
+              options.isAxiosError = error.isAxiosError;
+              options.response.error = error.message;
+              options.response = error.response;
+            }
+          }
+
+          if (!options.response) {
+            options.response = response;
+          }
+        }
+
+        return options;
+      })
+  );
+}
 
 async function getBasicApi(options) {
   urlSwagger = options.urlSwagger;
@@ -207,17 +359,11 @@ async function getBasicApi(options) {
   };
 }
 
-async function simpleRequest(
-  api,
-  swaggerApis,
-  key,
-  options = {
-    host,
-    changeInsideApiRequest,
-    token: {},
-    tokenConfig: { headerTokenVariableName: undefined, headers: undefined },
-  }
-) {
+async function simpleRequest(options) {
+  let api = options.api;
+  let swaggerApis = options.swaggerApis;
+  let key = options.key;
+  let data;
   let { pathsForTest, responseList, apiList, host, basePath } = swaggerApis;
 
   //! Api CURL:
@@ -225,6 +371,8 @@ async function simpleRequest(
 
   let response, responseOutput, passTest, color;
   let successTest = true;
+
+  options.api = api;
 
   try {
     //Change request api from changeInsideApiRequest
@@ -237,23 +385,17 @@ async function simpleRequest(
     }
 
     //! If headers exist:
-
     if (options.token) {
-      let headers = await getHeaders(
-        options.tokenConfig.headers,
-        options.token
-      );
+      options = await getHeaders(options);
+
+      let headers = options.headers;
 
       //! If exist token
 
       if (headers) {
         //! Using Header configurations:
-
-        // timeout: 5500,
-        response = await axios.get(api, {
-          headers: headers,
-          timeout: 6500,
-        });
+        options = await executeApiGETwithHeader(options);
+        response = options.response;
       }
     } else {
       response = await axios.get(api, {
@@ -261,31 +403,47 @@ async function simpleRequest(
       });
     }
 
+    try {
+      data = JSON.stringify(response.data).substr(0, 200);
+    } catch (error) {
+      data = "";
+    }
+
     responseOutput = {
-      data: JSON.stringify(response.data).substr(0, 200),
+      data: data,
       status: response.status,
       statusText: response.statusText,
       requestUrl: response.config.url,
       requestMethod: response.config.method,
+      headers: JSON.stringify(options.headers) || "",
     };
   } catch (error) {
     response = error.response;
 
+    if (!data) {
+      data = "";
+    }
+
     try {
+      //!
       responseOutput = {
-        data: JSON.stringify(response.data),
+        data: data,
         status: response.status,
         statusText: response.statusText,
         requestUrl: response.config.url,
         requestMethod: response.config.method,
+        headers: JSON.stringify(options.headers) || "",
       };
+      //!''
     } catch (error) {
+      //
       response = { config: { requestUrl: api, requestMethod: apiVerb } };
       response.data = "Internal Library error";
       response.status = 600;
       response.statusText = "Error in smokeTest request";
       response.requestUrl = api;
       response.requestMethod = apiVerb;
+      response.error = error.message;
 
       responseOutput = {
         data: response.data,
@@ -293,6 +451,8 @@ async function simpleRequest(
         statusText: response.statusText,
         requestUrl: api,
         requestMethod: apiVerb,
+        error: error.message,
+        headers: JSON.stringify(options.headers) || "",
       };
     }
   }
@@ -320,7 +480,6 @@ async function simpleRequest(
 
 async function getBasicResponse(options) {
   //
-  let urlSwagger = options.urlSwagger;
 
   let swaggerApis = await getBasicApi(options);
   let successSmokeTest = true;
@@ -343,24 +502,21 @@ async function getBasicResponse(options) {
     //! Api address with https:
     let api, data;
 
-    if (!options.host) {
-      api = "https://" + host + basePath + pathsForTest[key];
-    } else {
-      api = host + basePath + pathsForTest[key];
-    }
+    let https = options.urlSwagger.substring(
+      0,
+      options.urlSwagger.search("//") + 2
+    );
 
-    data = await simpleRequest(api, swaggerApis, key, options);
+    api = https + host + basePath + pathsForTest[key];
+
+    options.api = api;
+    options.swaggerApis = swaggerApis;
+    options.key = key;
+
+    data = await simpleRequest(options);
 
     successTest = data.successTest;
     responseOutput = data.responseOutput;
-
-    if (responseOutput.status === 600) {
-      api = "http://" + host + basePath + pathsForTest[key];
-      data = await simpleRequest(api, swaggerApis, key, options);
-
-      successTest = data.successTest;
-      responseOutput = data.responseOutput;
-    }
 
     if (!successTest) {
       successSmokeTest = false;
@@ -462,7 +618,27 @@ async function getToken(options) {
   return options;
 }
 
-async function smokeTest(smktestCriterial, urlSwagger, options) {
+async function smokeTest(urlSwagger, options) {
+  //! Init versions
+  let smktestCriterial;
+
+  if (!options) {
+    //? Define Options if not Exists
+    options = {};
+    smktestCriterial = "basic";
+  }
+
+  try {
+    if (!options.tokenConfig.curlRequest) {
+      console.log("@1Marker-No:_-1043019011");
+      smktestCriterial = "basic";
+    } else {
+      smktestCriterial = "basicWithAuth";
+    }
+  } catch (error) {
+    smktestCriterial = "basic";
+  }
+
   //
   let responseOfRequest,
     coverage,
@@ -475,10 +651,6 @@ async function smokeTest(smktestCriterial, urlSwagger, options) {
     host,
     dataReport,
     token;
-
-  if (!options) {
-    options = {};
-  }
 
   options.urlSwagger = urlSwagger;
   options.smktestCriterial = smktestCriterial;
@@ -503,7 +675,6 @@ async function smokeTest(smktestCriterial, urlSwagger, options) {
 
     options = await getToken(options);
     options.token = options.tokenObj.tokenValue;
-
     options = await getBasicResponse(options);
 
     responseOfRequest = options.basicResponse.responseOfRequest;
@@ -542,35 +713,35 @@ async function smokeTest(smktestCriterial, urlSwagger, options) {
 async function trainSmokeTest() {
   //!
 
-  // //! TEST 01 ---- >>>>
-  // let data = await smokeTest(
-  //   "basic",
-  //   "https://petstore.swagger.io/v2/swagger.json"
-  // );
-  // //! <<<<<
+  //! Test 03 >>>>>>>>>
+  let options = {
+    tokenConfig: {
+      curlRequest: `curl -X POST "https://edutelling-api-develop.openshift.techgap.it/api/v1/auth/authentication" -H "accept: application/json" -H "Content-Type: application/json" -d '{ \"email\": \"formazione@edutelling.it\", \"password\": \"Passw0rd\", \"stayLogged\": false }'`,
+    },
+  };
 
   let data = await smokeTest(
-    "basic",
-    "https://edutelling-api-develop.openshift.techgap.it/api/v1/api-docs/"
+    "https://edutelling-api-develop.openshift.techgap.it/api/v1/api-docs/",
+    options
   );
-
-  // let optionsSwagger = {
+  // //! Test 04 >>>>>>>>>
+  // let options = {
   //   tokenConfig: {
-  //     curlRequest: `curl -X POST "https://edutelling-api-develop.openshift.techgap.it/api/v1/auth/authentication" -H "accept: application/json" -H "Content-Type: application/json" -d '{ \"email\": \"formazione@edutelling.it\", \"password\": \"Passw0rd\", \"stayLogged\": false }'`,
-  //     tokenVariableName: "token",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       "accept-language": "en",
-  //       Authorization: "Bearer TOKEN",
-  //     },
+  //     curlRequest:
+  //       'curl -X POST "https://pot-uat.paxitalia.com:8443/api/public/auth/signin" -H "accept: */*" -H "Content-Type: application/json" -d "{ \\"password\\": \\"AdminPOT\\", \\"usernameOrEmail\\": \\"AdminPOT\\"}"',
   //   },
   // };
 
   // let data = await smokeTest(
   //   "basicWithAuth",
-  //   "https://edutelling-api-develop.openshift.techgap.it/api/v1/api-docs/",
-  //   optionsSwagger
+  //   "https://pot-uat.paxitalia.com:8443/api/v2/api-docs",
+  //   options
   // );
+
+  //! <<<<<<<<
+  console.log(">>>>>-381661556>>>>>");
+  console.log(data);
+  console.log("<<<<<<<<<<<<<<<<<<<");
 
   // let optionsSwagger = {
   //   tokenConfig: {
@@ -626,4 +797,4 @@ module.exports.simpleRequest = simpleRequest;
 module.exports.smokeTest = smokeTest;
 module.exports.trainSmokeTest = trainSmokeTest;
 
-trainSmokeTest();
+// trainSmokeTest();

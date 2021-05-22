@@ -5,15 +5,13 @@ test("Basic Swagger smoke-testing with Jest", async () => {
 
   let urlSwagger = "https://petstore.swagger.io/v2/swagger.json";
 
-  let smktestCriterial = "basic";
-
   let {
     responseOfRequest,
     coverage,
     successSmokeTest,
     report,
     abstractReport,
-  } = await swaggerSmktest.smokeTest(smktestCriterial, urlSwagger);
+  } = await swaggerSmktest.smokeTest(urlSwagger);
 
   console.log(report.render());
 
