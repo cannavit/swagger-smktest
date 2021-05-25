@@ -2,6 +2,10 @@ const shell = require('shelljs');
 const axios = require('axios');
 const Table = require('tty-table');
 const https = require('https');
+
+const curlirize = require('axios-curlirize');
+curlirize(axios);
+
 function sleep(milliseconds) {
   const date = Date.now();
   let currentDate = null;
@@ -180,6 +184,7 @@ async function executeAxiosGetHeader(options) {
     response = await axios.get(options.api, {
       headers: options.headers,
       timeout: 6500,
+      curlirize: false,
     });
     options.response = response;
     options.isAxiosError = false;
@@ -204,6 +209,7 @@ async function executeApiGETwithHeader(options) {
             response = await axios.get(options.api, {
               headers: headers,
               timeout: 6500,
+              curlirize: false,
             });
 
             options.isAxiosError = false;
@@ -259,6 +265,7 @@ async function executeApiGETwithHeader(options) {
               response = await axios.get(options.api, {
                 headers: optionsCopy.headers,
                 timeout: 7500,
+                curlirize: false,
               });
               options.isAxiosError = false;
               options.headers = headers;
@@ -398,6 +405,7 @@ async function simpleRequest(options) {
     } else {
       response = await axios.get(api, {
         timeout: 5500,
+        curlirize: false,
       });
     }
 
@@ -414,6 +422,7 @@ async function simpleRequest(options) {
       requestUrl: response.config.url,
       requestMethod: response.config.method,
       headers: JSON.stringify(options.headers) || '',
+      curlRequest: response.config.curlCommand || '',
     };
   } catch (error) {
     response = error.response;
@@ -431,6 +440,7 @@ async function simpleRequest(options) {
         requestUrl: response.config.url,
         requestMethod: response.config.method,
         headers: JSON.stringify(options.headers) || '',
+        curlRequest: response.config.curlCommand || '',
       };
       //!''
     } catch (error) {
@@ -442,6 +452,7 @@ async function simpleRequest(options) {
       response.requestUrl = api;
       response.requestMethod = apiVerb;
       response.error = error.message;
+      response.curlRequest = '';
 
       responseOutput = {
         data: response.data,
@@ -451,6 +462,7 @@ async function simpleRequest(options) {
         requestMethod: apiVerb,
         error: error.message,
         headers: JSON.stringify(options.headers) || '',
+        curlRequest: response.curlRequest || '',
       };
     }
   }
@@ -714,6 +726,7 @@ async function trainSmokeTest(urlSwagger, options) {
   let trainData = [];
   for (const key in data.responseOfRequest) {
     element = data.responseOfRequest[key];
+
     let dataElement = {
       type: 'swaggerSmkTest',
       apiVerb: element.requestMethod,
@@ -722,6 +735,7 @@ async function trainSmokeTest(urlSwagger, options) {
       passTrainingTest: element.passTest,
       trainingResponse: element.data,
       trainingHeaders: element.headers,
+      curlRequest: element.curlRequest,
     };
     trainData.push(dataElement);
   }
