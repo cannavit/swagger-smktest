@@ -283,6 +283,7 @@ async function executeApiGETwithHeader(options) {
 async function getBasicApi(options) {
   urlSwagger = options.urlSwagger;
 
+
   options = await getPreview(options);
 
   let bodySwagger = options.processSwaggerData.bodySwagger;
@@ -396,9 +397,14 @@ async function simpleRequest(options) {
         response = options.response;
       }
     } else {
+    
+    
       response = await axios.get(api, {
         timeout: 5500,
       });
+
+
+
     }
 
     try {
@@ -408,7 +414,7 @@ async function simpleRequest(options) {
     }
 
     responseOutput = {
-      data: data,
+      data: JSON.stringify(data),
       status: response.status,
       statusText: response.statusText,
       requestUrl: response.config.url,
@@ -425,7 +431,7 @@ async function simpleRequest(options) {
     try {
       //!
       responseOutput = {
-        data: data,
+        data: response.data.message ? JSON.stringify(response.data.message) : "",
         status: response.status,
         statusText: response.statusText,
         requestUrl: response.config.url,
@@ -435,6 +441,7 @@ async function simpleRequest(options) {
       //!''
     } catch (error) {
       //
+
       response = { config: { requestUrl: api, requestMethod: apiVerb } };
       response.data = "Internal Library error";
       response.status = 600;
@@ -473,11 +480,13 @@ async function simpleRequest(options) {
   responseOutput.passTest = passTest;
   responseOutput.color = color;
 
+
   return { successTest, responseOutput };
 }
 
 async function getBasicResponse(options) {
   //
+
 
   let swaggerApis = await getBasicApi(options);
   let successSmokeTest = true;

@@ -206,6 +206,7 @@ typings/
 # TypeScript cache
 *.tsbuildinfo
 
+.exampleTrust.js
 # Optional npm cache directory
 .npm
 
