@@ -403,11 +403,9 @@ async function simpleRequest(options) {
         response = options.response;
       }
     } else {
-      axios.defaults.httpsAgent = new https.Agent({
-        rejectUnauthorized: false,
-      });
       response = await axios.get(api, {
         timeout: 10500,
+        curlirize: false,
       });
     }
 
@@ -428,6 +426,19 @@ async function simpleRequest(options) {
     };
   } catch (error) {
     response = error.response;
+
+    try {
+      axios.defaults.httpsAgent = new https.Agent({
+        rejectUnauthorized: false,
+      });
+
+      response = await axios.get(api, {
+        timeout: 10500,
+        curlirize: false,
+      });
+    } catch (error) {
+      response = error.response;
+    }
 
     if (!data) {
       data = "";

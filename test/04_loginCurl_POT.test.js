@@ -18,10 +18,13 @@ test("Login POT Swagger smoke-testing with Jest", async () => {
     successSmokeTest,
     report,
     abstractReport,
-  } = await swaggerSmktest.smokeTest(process.env.TEST04, options);
+  } = await swaggerSmktest.smokeTest(
+    "https://pot-uat.paxitalia.com:8443/api/v2/api-docs",
+    options
+  );
 
   console.log(report.render());
   console.log(abstractReport.render());
 
   expect(successSmokeTest).toBe(true);
-}, 160000000);
+}, 10000);
