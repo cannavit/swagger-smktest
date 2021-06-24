@@ -2,6 +2,14 @@ const swaggerSmktest = require("./src/services/swaggerSmktest");
 
 async function test(options) {
   let urlSwagger = "https://pot-uat.paxitalia.com:8443/api/v2/api-docs";
+  // let urlSwagger = "https://petstore.swagger.io/v2/swagger.json";
+  // https://pot-uat.paxitalia.com:8443/api/v2/api-docs
+
+  options = {
+    tokenConfig: {
+      curlRequest: process.env.CURLTEST04,
+    },
+  };
 
   let {
     responseOfRequest,
@@ -9,11 +17,12 @@ async function test(options) {
     successSmokeTest,
     report,
     abstractReport,
-  } = await swaggerSmktest.smokeTest(urlSwagger);
+  } = await swaggerSmktest.smokeTest(urlSwagger, options);
 
   console.log(report.render());
-
   console.log(abstractReport.render());
+
+  //  expect(successSmokeTest).toBe(true);
 
   return options;
 }
