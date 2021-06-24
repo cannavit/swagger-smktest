@@ -2,7 +2,7 @@ const swaggerSmktest = require("../src/services/swaggerSmktest");
 const dotenv = require("dotenv");
 dotenv.config();
 
-//TODO if have one error is beacouse the load of preview have problema. Need change other view before.
+//TODO if have one error is because the load of preview have problem. Need change other view before.
 test("Login Swagger smoke-testing with Jest", async () => {
   //! Is possible use /api-docs
 

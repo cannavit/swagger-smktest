@@ -283,7 +283,6 @@ async function executeApiGETwithHeader(options) {
 async function getBasicApi(options) {
   urlSwagger = options.urlSwagger;
 
-
   options = await getPreview(options);
 
   let bodySwagger = options.processSwaggerData.bodySwagger;
@@ -397,14 +396,12 @@ async function simpleRequest(options) {
         response = options.response;
       }
     } else {
-    
-    
-      response = await axios.get(api, {
-        timeout: 5500,
+      axios.defaults.httpsAgent = new https.Agent({
+        rejectUnauthorized: false,
       });
-
-
-
+      response = await axios.get(api, {
+        timeout: 10500,
+      });
     }
 
     try {
@@ -414,7 +411,7 @@ async function simpleRequest(options) {
     }
 
     responseOutput = {
-      data: JSON.stringify(data),
+      data: data ? JSON.stringify(data) : "",
       status: response.status,
       statusText: response.statusText,
       requestUrl: response.config.url,
@@ -430,8 +427,11 @@ async function simpleRequest(options) {
 
     try {
       //!
+
       responseOutput = {
-        data: response.data.message ? JSON.stringify(response.data.message) : "",
+        data: response.data.message
+          ? JSON.stringify(response.data.message)
+          : "",
         status: response.status,
         statusText: response.statusText,
         requestUrl: response.config.url,
@@ -480,13 +480,11 @@ async function simpleRequest(options) {
   responseOutput.passTest = passTest;
   responseOutput.color = color;
 
-
   return { successTest, responseOutput };
 }
 
 async function getBasicResponse(options) {
   //
-
 
   let swaggerApis = await getBasicApi(options);
   let successSmokeTest = true;

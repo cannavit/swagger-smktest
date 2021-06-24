@@ -207,6 +207,9 @@ typings/
 *.tsbuildinfo
 
 .exampleTrust.js
+.examplePOT.js
+.exampleEdutelling.js
+
 # Optional npm cache directory
 .npm
 
