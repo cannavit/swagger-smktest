@@ -34,15 +34,21 @@ async function processDataOfresultOfExec(options) {
 
   return options;
 }
+
 async function swaggerNotHaveJson(options) {
   //? Case edutelling.
-
+  console.log("@1Marker-No:_-206562582");
   //!Check first edutelling format.
   let ENDPOINT_SCANN_SWAGGER_FROM = `curl -XGET -H \"accept-language: it\" -H \"Content-type: application/json\" '${options.urlSwagger}/swagger-ui-init.js'`;
 
+  console.log(">>>>>588302195>>>>>");
+  console.log(ENDPOINT_SCANN_SWAGGER_FROM);
+  console.log("<<<<<<<<<<<<<<<<<<<");
   let resultOfExec = await shell.exec(ENDPOINT_SCANN_SWAGGER_FROM, {
-    silent: true,
+    silent: false,
   });
+
+  console.log("@1Marker-No:_-1251867104");
 
   if (resultOfExec.stdout.length > 400) {
     options.resultOfExec = resultOfExec;
@@ -55,6 +61,7 @@ async function swaggerNotHaveJson(options) {
 }
 
 async function swaggerHaveJson(options) {
+  //
   let ENDPOINT_SCANN_SWAGGER_FROM = `curl -XGET -H \"accept-language: en\" -H \"Content-type: application/json\" '${options.urlSwagger}'`;
 
   options.resultOfExec = await shell.exec(ENDPOINT_SCANN_SWAGGER_FROM, {
@@ -71,6 +78,7 @@ async function swaggerHaveJson(options) {
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 async function getPreview(options) {
   //
+  console.log("@1Marker-No:_574037645");
   //! Init swagger page:
 
   return await swaggerNotHaveJson(options)
@@ -124,16 +132,21 @@ async function getPreview(options) {
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 async function getHeadersFromCURL(options, searchBy) {
+  //
+  //
   let curl = options.tokenConfig.curlRequest;
 
   //! Check if exist header:
   // let searchBy = "-H";
   let headerData = [];
+
   if (curl.includes(searchBy)) {
+    //
     curl = curl.substring(curl.search("-H"), curl.length - 1);
     curl = curl.split('"');
 
     let saveHeader = false;
+
     for (const key in curl) {
       const element = curl[key];
 
@@ -240,8 +253,10 @@ async function executeApiGETwithHeader(options) {
           let optionsCopy = options;
 
           //! <<<<< Only if is error >>>>>>
+
           if (options.isAxiosError || options.isAxiosError === undefined) {
             //! Add Bearer if is necessary:
+
             if (element.useBearer) {
               if (!options.tokenObj.tokenValue.includes("Bearer")) {
                 optionsCopy.headers[optionsCopy.tokenObj.tokenVariable] =
@@ -251,6 +266,7 @@ async function executeApiGETwithHeader(options) {
               optionsCopy.headers[optionsCopy.tokenObj.tokenVariable] =
                 options.tokenObj.tokenValue;
             }
+
             //! Create name token variable:
 
             optionsCopy.headers[element.tokenName] =
@@ -288,56 +304,64 @@ async function executeApiGETwithHeader(options) {
 }
 
 async function getBasicApi(options) {
+  console.log("@1Marker-No:_1520948214");
   urlSwagger = options.urlSwagger;
-
+  console.log("@1Marker-No:_-1165624426");
   options = await getPreview(options);
-
+  console.log("@1Marker-No:_825917577");
   let bodySwagger = options.processSwaggerData.bodySwagger;
   let isSwaggerJson = options.processSwaggerData.isSwaggerJson;
 
   let paths, host, basePath;
+  console.log("@1Marker-No:_1621930885");
 
   if (!isSwaggerJson) {
     eval(bodySwagger); // Get variable options.
-
+    console.log("@1Marker-No:_-1668165708");
     try {
       paths = options.swaggerDoc.paths;
       basePath = options.swaggerDoc.basePath;
       host = urlSwagger.substr(0, urlSwagger.search(basePath));
 
       //! Select the host if not exist inside to the option:
+      console.log("@1Marker-No:_965509725");
       if (!options.host) {
+        console.log("@1Marker-No:_-265226977");
         host = host.substr(urlSwagger.search("//") + 2, host.length);
       } else {
+        console.log("@1Marker-No:_-527527520");
         host = options.host;
       }
     } catch (error) {
+      console.log("@1Marker-No:_-695329635");
       paths = [];
     }
   } else {
     paths = bodySwagger.paths;
-
+    console.log("@1Marker-No:_-2011656391");
     //! Select the host if not exist inside to the option:
     if (!options.host) {
       host = bodySwagger.host;
     } else {
       host = options.host;
     }
+    console.log("@1Marker-No:_2019817453");
 
     basePath = bodySwagger.basePath;
   }
 
   //! Rule, search [GET] Apis with not parmams.
-
+  console.log("@1Marker-No:_-189008082");
   var pathsName = Object.keys(paths);
   var pathsForTest = [];
   var responseList = [];
   var apiList = [];
   var totalApis = 0;
   var numberBasicApis = 0;
-  //
+
+  console.log("@1Marker-No:_-1252411863");
   for (const key in pathsName) {
-    //
+    console.log("@1Marker-No:_1325235094");
     totalApis = totalApis + 1;
     let pathI = paths[pathsName[key]];
 
@@ -507,8 +531,14 @@ async function simpleRequest(options) {
 
 async function getBasicResponse(options) {
   //
-
+  console.log("@1Marker-No:_1854282760");
   let swaggerApis = await getBasicApi(options);
+  console.log("@1Marker-No:_1872523987");
+
+  console.log(">>>>>1582019619>>>>>");
+  console.log(swaggerApis);
+  console.log("<<<<<<<<<<<<<<<<<<<");
+
   let successSmokeTest = true;
 
   let {
@@ -606,10 +636,15 @@ async function reportSmokeTest(responseOfRequest, smktestAbstract) {
 async function getToken(options) {
   let tokenVariable, tokenValue, token, bearerVariable;
   let bearerValue = "";
+
   if (options.tokenConfig) {
     let shellResult = await shell.exec(options.tokenConfig.curlRequest, {
       silent: true,
     });
+
+    console.log(">>>>>-1457252936>>>>>");
+    console.log(shellResult);
+    console.log("<<<<<<<<<<<<<<<<<<<");
 
     let shellResultsJson = JSON.parse(shellResult.stdout);
 
@@ -699,16 +734,26 @@ async function smokeTest(urlSwagger, options) {
   } else if (smktestCriterial === "basicWithAuth") {
     //! Get Token
 
+    console.log("@1Marker-No:_941597684");
     options = await getToken(options);
-    options.token = options.tokenObj.tokenValue;
-    options = await getBasicResponse(options);
+    console.log("@1Marker-No:_-1946578812");
 
+    options.token = options.tokenObj.tokenValue;
+
+    console.log(">>>>>-755150535>>>>>");
+    console.log(options.token);
+    console.log("<<<<<<<<<<<<<<<<<<<");
+    console.log("@1Marker-No:_536169830");
+    options = await getBasicResponse(options);
+    console.log("@1Marker-No:_-1433334610");
     responseOfRequest = options.basicResponse.responseOfRequest;
     coverage = options.basicResponse.coverage;
     successSmokeTest = options.basicResponse.successSmokeTest;
     totalApis = options.basicResponse.totalApis;
     numberBasicApis = options.basicResponse.numberBasicApis;
     host = options.basicResponse.host;
+
+    console.log("@1Marker-No:_-1482657652");
   }
 
   //! SmokeTest abstract report:
@@ -739,6 +784,10 @@ async function smokeTest(urlSwagger, options) {
 async function trainSmokeTest(urlSwagger, options) {
   //!
   let data = await smokeTest(urlSwagger, options);
+
+  console.log(">>>>>-1509448322>>>>>");
+  console.log(data);
+  console.log("<<<<<<<<<<<<<<<<<<<");
 
   let trainData = [];
   for (const key in data.responseOfRequest) {
