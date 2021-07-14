@@ -6,3 +6,4 @@ module.exports.getBasicResponse = swaggerSmktest.getBasicResponse;
 module.exports.simpleRequest = swaggerSmktest.simpleRequest;
 module.exports.smokeTest = swaggerSmktest.smokeTest;
 module.exports.trainSmokeTest = swaggerSmktest.trainSmokeTest;
+module.exports.getToken = swaggerSmktest.getToken;
